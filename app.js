@@ -47,4 +47,7 @@ app.delete('/api/reserve/:id', (req, res) => {
     });
 });
 
-app.listen(3000, () => console.log("서버가 3000번 포트에서 실행 중입니다."));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`서버가 ${PORT} 포트에서 시작되었습니다.`);
+});
