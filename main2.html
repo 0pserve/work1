@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>booked</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<script src="data.js"></script>
+
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Pretendard',sans-serif}
+  body{background:#F8F9FB; color:#333;}
+  
+  /* 헤더 및 메뉴 */
+  .header{height:64px; display:flex; justify-content:space-between; align-items:center; padding:0 24px; background:#fff; border-bottom:1px solid #E0E4EA; position:sticky; top:0; z-index:100;}
+  .header h1{font-size:20px; font-weight:700; color:#bd2aa4; cursor:pointer;}
+  .menu{position:fixed; top:0; right:0; width:280px; height:100%; background:#fff; padding:30px; transform:translateX(100%); transition:.3s; z-index:1000; box-shadow:-10px 0 20px rgba(0,0,0,0.05)}
+  .menu.open{transform:translateX(0)}
+  .menu a{display:block; margin:25px 0; font-size:16px; font-weight:600; color:#444; text-decoration:none; cursor:pointer;}
+  .menu-trigger { font-size: 28px; /* 크기를 키움 */ font-weight: bold; color: #333; cursor: pointer; line-height: 1; display: flex; align-items: center;}
+  /* 히어로 배너 */
+  .hero {
+    height: 300px;
+    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600');
+    background-size: cover; background-position: center;
+    display: flex; align-items: center; justify-content: center; color: #fff; text-align: center;
+  }
+  .hero h2 { font-size: 36px; letter-spacing: -1px; }
+
+  /* 컨텐츠 영역 */
+  #content-area { max-width: 1100px; margin: 0 auto; padding: 40px 20px; min-height: 50vh; }
+
+  /* 정렬 필터 버튼 */
+  .filters { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 25px; }
+  .filter-btn { padding: 8px 16px; border: 1px solid #ddd; background: #fff; border-radius: 20px; cursor: pointer; font-size: 13px; transition: 0.2s; }
+  .filter-btn:hover, .filter-btn.active { background: #bd2aa4; color: #fff; border-color: #bd2aa4; }
+
+  /* 호텔 카드 그리드 */
+  .hotel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+  .hotel-card { background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 10px 20px rgba(0,0,0,0.05); transition:.3s; border: 1px solid #eee; }
+  .hotel-card:hover { transform:translateY(-8px); }
+  .hotel-img { height:200px; background-size:cover; background-position:center; }
+  .hotel-info { padding:24px; }
+  .price-tag { font-size:20px; font-weight:800; color:#bd2aa4; }
+  .btn-reserve { width:100%; padding:14px; background:#111; color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:700; margin-top:20px; }
+
+  /* 서브 페이지 카드 */
+  .sub-card { max-width: 500px; margin: 0 auto; padding: 40px; background: #fff; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.06); text-align: center; }
+  .input-field { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; outline: none; }
+
+  /* FAQ 검색 */
+  .faq-search-wrap { max-width: 800px; margin: 0 auto 18px auto; }
+  .faq-search { width: 100%; padding: 14px 16px; border: 1px solid #ddd; border-radius: 12px; outline: none; background: #fff; font-size: 14px; }
+  .faq-search:focus { border-color: #bd2aa4; box-shadow: 0 0 0 3px rgba(189,42,164,0.12); }
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1 onclick="location.reload()">Booked</h1>
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <div class="menu-trigger" onclick="toggleMenu()" style="cursor:pointer; margin-left:10px;">☰</div>
+    </div>
+</div>
+
+<div class="menu" id="sideMenu">
+  <div onclick="toggleMenu()" style="text-align:right; cursor:pointer; font-size:24px;">✕</div>
+  <a onclick="showSection('booking')">🏨 숙박예약</a>
+  <a onclick="showSection('login')">🔍 예약조회</a>
+  <a onclick="showSection('cs')">📞 고객센터</a>
+  <a onclick="showSection('faq')">❓ 자주 묻는 질문</a>
+</div>
+
+<div class="hero">
+  <div>
+    <h2 id="heroTitle">Title</h2>
+    <p id="heroSub">Hero Sub</p>
+  </div>
+</div>
+
+<div id="content-area">
+</div>
+
+<script>
+// 2. 정렬 기능 (HOTEL_DATA 사용)
+function toggleMenu() { document.getElementById("sideMenu").classList.toggle("open"); }
+
+// 2. 정렬 기능 함수
+function sortHotels(type) {
+  const sorted = [...HOTEL_DATA].sort((a, b) => type === 'low' ? a.price - b.price : b.price - a.price);
+  renderBookingContent(sorted);
+}
+
+// 3. 숙박예약 리스트 렌더링 함수
+function renderBookingContent(data = HOTEL_DATA) {
+  let html = `
+    <div style="margin-bottom: 40px; border-left: 4px solid #bd2aa4; padding-left: 20px;">
+      <h3 style="font-size: 24px; font-weight: 800; color: #111; margin-bottom: 10px; letter-spacing: -0.5px;">
+        숙박 예약
+      </h3>
+      <p style="font-size: 15px; color: #555; line-height: 1.7;">
+        설명이 들어가는 공긴입니다.<br>
+       설명이 들어가는 공간입니다.
+      </p>
+    </div>
+
+    <div class="filters">
+      <button class="filter-btn" onclick="sortHotels('low')">가격 낮은순</button>
+      <button class="filter-btn" onclick="sortHotels('high')">가격 높은순</button>
+    </div>
+
+    <div class="hotel-grid">`;
+  
+  data.forEach(hotel => {
+    html += `
+      <div class="hotel-card">
+        <div class="hotel-img" style="background-image:url('${hotel.img}')"></div>
+        <div class="hotel-info">
+          <h3>${hotel.name}</h3>
+          <p style="color:#f1c40f; margin-bottom:15px;">${hotel.star}</p>
+          <span class="price-tag">₩ ${hotel.price.toLocaleString()}~</span>
+          <button class="btn-reserve" onclick="location.href='detail.html?id=${hotel.id}'">예약하기</button>
+        </div>
+      </div>`;
+  });
+  html += `</div>`;
+  document.getElementById("content-area").innerHTML = html;
+}
+// 4. 메인 화면 전환 로직
+function showSection(key) {
+    const area = document.getElementById("content-area");
+    const heroTitle = document.getElementById("heroTitle");
+    const heroSub = document.getElementById("heroSub");
+  
+  heroTitle.innerText = SECTION_TITLE[key].title;
+  heroSub.innerText = SECTION_TITLE[key].sub;
+
+if (key === 'booking') {
+        renderBookingContent();
+    } else if (key === 'faq') {
+        // FAQ 전용 렌더링 함수 호출
+        renderFaqContent();
+    } else if (key === 'login') {
+    area.innerHTML = `
+    <div class="sub-card">
+        <h2 style="margin-bottom:20px; font-weight:800;">로그인</h2>
+        <p style="margin-bottom:25px; color:#666; font-size:14px;">이메일과 비밀번호를 입력해주세요.</p>
+        
+        <input type="text" id="loginId" class="input-field" placeholder="이메일">
+        <input type="password" id="loginPw" class="input-field" placeholder="비밀번호">
+        
+        <button class="btn-reserve" style="background:#bd2aa4; margin-top:20px;" onclick="checkLogin()">
+          조회하기
+        </button>
+        
+        <div style="margin-top:20px; font-size:13px; color:#888;">
+          <a href="#" style="color:#888; text-decoration:none; margin:0 10px;">비밀번호 찾기</a>
+        </div>
+    </div>`;
+} else if (key === 'cs') {
+    area.innerHTML = `
+      <div class="sub-card" style="max-width:800px; padding:0; overflow:hidden;">
+          <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=800&q=80" 
+               alt="Customer Support" 
+               style="width:100%; height:auto; display:block;">
+      </div>`;
+    }
+
+    const sideMenu = document.getElementById("sideMenu");
+    if(sideMenu.classList.contains("open")) {
+        sideMenu.classList.remove("open");
+    }
+
+    window.scrollTo(0, 0);
+}
+
+
+
+async function checkLogin() {
+    const email = document.getElementById('loginId').value;
+    const pw = document.getElementById('loginPw').value;
+
+    const response = await fetch('/api/check-reservation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, password: pw })
+    });
+
+    const result = await response.json();
+    if (result.success) {
+        // 성공 시에만 해당 데이터로 이동
+        location.href = `result.html?name=${result.data.guestName}...`;
+    } else {
+        alert(result.message);
+    }
+}
+
+function updateHeader() {
+    const userJson = sessionStorage.getItem('loggedInUser');
+    const authArea = document.getElementById('auth-area'); // 헤더의 로그인 버튼 영역 ID
+
+    if (userJson) {
+        const user = JSON.parse(userJson);
+        authArea.innerHTML = `
+            <span><b>${user.name}</b>님 환영합니다</span>
+            <button onclick="handleLogout()">로그아웃</button>
+        `;
+    }
+}
+
+function handleLogout() {
+    sessionStorage.removeItem('loggedInUser');
+    alert("로그아웃 되었습니다.");
+    location.reload();
+}
+
+// 페이지 로드 시 실행
+window.onload = updateHeader;
+
+// FAQ 렌더링 함수 (FAQ_DATA 사용)
+function renderFaqContent(query = '') {
+    const q = (query || '').trim().toLowerCase();
+    const filtered = q
+      ? FAQ_DATA.filter(item =>
+          (item.q || '').toLowerCase().includes(q) ||
+          (item.a || '').toLowerCase().includes(q)
+        )
+      : FAQ_DATA;
+
+    let html = `
+      <div class="faq-search-wrap">
+        <input id="faqSearch" class="faq-search" type="text" placeholder="FAQ 검색 (질문/답변)" value="${(query || '').replace(/"/g, '&quot;')}">
+      </div>
+      <div style="max-width:800px; margin: 0 auto;">
+    `;
+
+    if (filtered.length === 0) {
+      html += `<div style="padding: 30px 0; color:#888; text-align:center;">검색 결과가 없습니다.</div>`;
+    } else {
+      filtered.forEach((item, index) => {
+        html += `
+          <div style="border-bottom:1px solid #eee; padding: 20px 0; cursor:pointer;" onclick="toggleFaqAnswer(${index})">
+              <div style="font-weight:700;">Q. ${item.q}</div>
+              <div id="ans-${index}" style="display:none; margin-top:10px; color:#666; background:#f9f9f9; padding:15px; border-radius:10px;">
+                  A. ${item.a}
+              </div>
+          </div>`;
+      });
+    }
+
+    html += `</div>`;
+    const area = document.getElementById("content-area");
+    area.innerHTML = html;
+
+    const input = document.getElementById('faqSearch');
+    if (input) {
+      input.addEventListener('input', (e) => {
+        renderFaqContent(e.target.value);
+      });
+    }
+}
+
+function toggleFaqAnswer(index) {
+  const a = document.getElementById(`ans-${index}`);
+  if (!a) return;
+  a.style.display = a.style.display === 'none' ? 'block' : 'none';
+}
+
+// 최초 실행
+showSection('booking');
+</script>
+
+</body>
+</html>
