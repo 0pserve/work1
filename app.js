@@ -1,8 +1,17 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const app = express();
+const path = require('path');
 
-app.use(express.json());
+// 1. HTML, CSS, JS 파일들이 있는 폴더를 '정적(static)' 폴더로 지정
+// 파일들이 루트(최상위)에 있다면 아래와 같이 설정합니다.
+app.use(express.static(__dirname));
+
+// 2. 누군가 사이트 주소( / )로 접속하면 main2.html을 보내줌
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'main2.html'));
+});
+
 
 // 1. DB 연결 (hotel.db 파일이 없으면 새로 생성됨)
 const db = new sqlite3.Database('./hotel.db', (err) => {
@@ -51,3 +60,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`서버가 ${PORT} 포트에서 시작되었습니다.`);
 });
+
