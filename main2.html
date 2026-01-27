@@ -2,196 +2,314 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>booked</title>
+<title>booked - Integrated</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="data.js"></script>
 
 <style>
+  /* [기본 설정] */
   *{margin:0;padding:0;box-sizing:border-box;font-family:'Pretendard',sans-serif}
-  body{background:#F8F9FB; color:#333;}
+  body{background:#F8F9FB; color:#333; padding-bottom: 120px;}
   
-  /* 헤더 및 메뉴 */
+  /* [헤더] */
   .header{height:64px; display:flex; justify-content:space-between; align-items:center; padding:0 24px; background:#fff; border-bottom:1px solid #E0E4EA; position:sticky; top:0; z-index:100;}
   .header h1{font-size:20px; font-weight:700; color:#bd2aa4; cursor:pointer;}
+  
+  /* [사이드 메뉴] */
   .menu{position:fixed; top:0; right:0; width:280px; height:100%; background:#fff; padding:30px; transform:translateX(100%); transition:.3s; z-index:1000; box-shadow:-10px 0 20px rgba(0,0,0,0.05)}
   .menu.open{transform:translateX(0)}
   .menu a{display:block; margin:25px 0; font-size:16px; font-weight:600; color:#444; text-decoration:none; cursor:pointer;}
-  .menu-trigger { font-size: 28px; /* 크기를 키움 */ font-weight: bold; color: #333; cursor: pointer; line-height: 1; display: flex; align-items: center;}
-  /* 히어로 배너 */
-  .hero {
-    height: 300px;
-    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600');
-    background-size: cover; background-position: center;
-    display: flex; align-items: center; justify-content: center; color: #fff; text-align: center;
+  .menu-trigger { font-size: 28px; font-weight: bold; color: #333; cursor: pointer; }
+
+  /* [히어로 배너] */
+  .hero { 
+    height: 300px; 
+    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600'); 
+    background-size: cover; background-position: center; 
+    display: flex; align-items: center; justify-content: center; color: #fff; text-align: center; 
   }
   .hero h2 { font-size: 36px; letter-spacing: -1px; }
 
-  /* 컨텐츠 영역 */
+  /* [메인 컨텐츠 레이아웃] */
   #content-area { max-width: 1100px; margin: 0 auto; padding: 40px 20px; min-height: 50vh; }
-
-  /* 정렬 필터 버튼 */
+  
+  /* [호텔 그리드 & 필터] */
   .filters { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 25px; }
   .filter-btn { padding: 8px 16px; border: 1px solid #ddd; background: #fff; border-radius: 20px; cursor: pointer; font-size: 13px; transition: 0.2s; }
   .filter-btn:hover, .filter-btn.active { background: #bd2aa4; color: #fff; border-color: #bd2aa4; }
-
-  /* 호텔 카드 그리드 */
+  
   .hotel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
   .hotel-card { background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 10px 20px rgba(0,0,0,0.05); transition:.3s; border: 1px solid #eee; }
   .hotel-card:hover { transform:translateY(-8px); }
   .hotel-img { height:200px; background-size:cover; background-position:center; }
-  .hotel-info { padding:24px; }
+  .hotel-info { padding:24px; text-align: left; }
   .price-tag { font-size:20px; font-weight:800; color:#bd2aa4; }
   .btn-reserve { width:100%; padding:14px; background:#111; color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:700; margin-top:20px; }
 
-  /* 서브 페이지 카드 */
+  /* [상세 페이지 전용 카드] */
+  .section-card { background: #fff; padding: 30px; border-radius: 20px; border: 1px solid #eee; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); text-align: left; }
+  .booking-layout { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 30px; }
+  .cal-box { flex: 0 0 350px; gap: 15px;}
+  .room-box { flex: 1; }
+  .room-card { display: flex; gap: 15px; padding: 15px; border: 2px solid #f0f0f0; border-radius: 16px; cursor: pointer; margin-bottom: 12px; transition: 0.3s; background: #fff; align-items: center; }
+  .room-card.active { border-color: #bd2aa4; background: #fdf5fc; }
+  .room-img-sm { width: 120px; height: 90px; border-radius: 12px; object-fit: cover; }
+  
+  /* [객실 옵션 패널] */
+  .option-panel { max-height: 0; overflow: hidden; opacity: 0; transition: 0.4s ease; background: #fff; border: 1px solid #eee; border-radius: 15px; margin-top: -8px; margin-bottom: 20px; }
+  .option-panel.show { max-height: 1200px; opacity: 1; padding: 25px; }
+  .counter-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .cnt-btns { display: flex; align-items: center; gap: 12px; }
+  .cnt-btns button { width: 30px; height: 30px; border-radius: 50%; border: 1px solid #ddd; background: #fff; cursor: pointer; }
+
+  /* [하단 결제바] */
+  .payment-fix { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; padding: 20px 40px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; z-index: 1000; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); }
+  
+  /* [서브 카드: 로그인/CS/FAQ] */
   .sub-card { max-width: 500px; margin: 0 auto; padding: 40px; background: #fff; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.06); text-align: center; }
   .input-field { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; outline: none; }
+  .faq-search { width: 100%; padding: 14px 16px; border: 1px solid #ddd; border-radius: 12px; outline: none; margin-bottom: 20px; }
+  .map-frame { width: 100%; height: 350px; border-radius: 15px; border: 1px solid #eee; }
 
-  /* FAQ 검색 */
-  .faq-search-wrap { max-width: 800px; margin: 0 auto 18px auto; }
-  .faq-search { width: 100%; padding: 14px 16px; border: 1px solid #ddd; border-radius: 12px; outline: none; background: #fff; font-size: 14px; }
-  .faq-search:focus { border-color: #bd2aa4; box-shadow: 0 0 0 3px rgba(189,42,164,0.12); }
-
+  /* [세부 설정내 중첩된 아코디언] */
+  .inner-acc { border: 1px solid #edf1f7; border-radius: 12px; margin-bottom: 20px; overflow: hidden; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+  .inner-acc-head { padding: 16px 20px; background: #fcfcfd; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+  .inner-acc-head:hover { background: #f4f7fa; }
+  .inner-acc-head span:first-child { font-size: 15px; font-weight: 700; color: #444; display: flex; align-items: center; gap: 8px; }
+  .inner-acc-head span:last-child { font-size: 10px; color: #bd2aa4; background: #fdf5fc; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: 0.3s; }
+  .inner-acc-body { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.3s ease; background: #fff; line-height: 1.8; color: #666; font-size: 14px; padding: 0 20px; }
+  .inner-acc-body.open { max-height: 500px; opacity: 1; padding: 20px; border-top: 1px solid #f1f1f1; }
 </style>
 </head>
 
 <body>
-
 <div class="header">
     <h1 onclick="location.reload()">Booked</h1>
     <div style="display: flex; align-items: center; gap: 15px;">
-        <div class="menu-trigger" onclick="toggleMenu()" style="cursor:pointer; margin-left:10px;">☰</div>
+        <div id="auth-area"></div>
+        <div class="menu-trigger" onclick="toggleMenu()">☰</div>
     </div>
 </div>
 
-<div class="menu" id="sideMenu">
-  <div onclick="toggleMenu()" style="text-align:right; cursor:pointer; font-size:24px;">✕</div>
+<nav class="menu" id="sideMenu">
+  <div onclick="toggleMenu()" style="text-align:right; cursor:pointer; font-size:24px; margin-bottom:20px;">✕</div>
   <a onclick="showSection('booking')">🏨 숙박예약</a>
   <a onclick="showSection('login')">🔍 예약조회</a>
   <a onclick="showSection('cs')">📞 고객센터</a>
   <a onclick="showSection('faq')">❓ 자주 묻는 질문</a>
-</div>
+</nav>
 
 <div class="hero">
-  <div>
-    <h2 id="heroTitle">Title</h2>
-    <p id="heroSub">Hero Sub</p>
-  </div>
+  <div><h2 id="heroTitle">Title</h2><p id="heroSub">Hero Sub</p></div>
 </div>
 
-<div id="content-area">
+<div id="content-area"></div>
+
+<div id="payment-bar" class="payment-fix" style="display:none;">
+    <div><span style="color:#888; font-size:14px;">최종 결제 금액</span><br><span id="totalAmount" style="font-size: 28px; font-weight: 800; color: #bd2aa4;">0</span>원</div>
+    <button class="btn-reserve" style="width:220px; margin:0; background:#bd2aa4;" onclick="alert('예약 프로세스를 시작합니다.')">예약 신청하기</button>
 </div>
 
 <script>
-// 2. 정렬 기능 (HOTEL_DATA 사용)
-function toggleMenu() { document.getElementById("sideMenu").classList.toggle("open"); }
+// [상태 관리 및 초기화]
+let state = { nights: 0, roomPrice: 0, guests: 1, bf: 0 };
 
-// 2. 정렬 기능 함수
-function sortHotels(type) {
-  const sorted = [...HOTEL_DATA].sort((a, b) => type === 'low' ? a.price - b.price : b.price - a.price);
-  renderBookingContent(sorted);
+function toggleMenu() { 
+    document.getElementById("sideMenu").classList.toggle("open"); 
 }
 
-// 3. 숙박예약 리스트 렌더링 함수
+// [1. 숙박 예약 리스트 렌더링]
 function renderBookingContent(data = HOTEL_DATA) {
-  let html = `
-    <div style="margin-bottom: 40px; border-left: 4px solid #bd2aa4; padding-left: 20px;">
-      <h3 style="font-size: 24px; font-weight: 800; color: #111; margin-bottom: 10px; letter-spacing: -0.5px;">
-        숙박 예약
-      </h3>
-      <p style="font-size: 15px; color: #555; line-height: 1.7;">
-        설명이 들어가는 공긴입니다.<br>
-       설명이 들어가는 공간입니다.
-      </p>
-    </div>
-
-    <div class="filters">
-      <button class="filter-btn" onclick="sortHotels('low')">가격 낮은순</button>
-      <button class="filter-btn" onclick="sortHotels('high')">가격 높은순</button>
-    </div>
-
-    <div class="hotel-grid">`;
-  
-  data.forEach(hotel => {
-    html += `
-      <div class="hotel-card">
-        <div class="hotel-img" style="background-image:url('${hotel.img}')"></div>
-        <div class="hotel-info">
-          <h3>${hotel.name}</h3>
-          <p style="color:#f1c40f; margin-bottom:15px;">${hotel.star}</p>
-          <span class="price-tag">₩ ${hotel.price.toLocaleString()}~</span>
-          <button class="btn-reserve" onclick="location.href='detail.html?id=${hotel.id}'">예약하기</button>
+    let html = `
+        <div style="margin-bottom:40px; border-left:4px solid #bd2aa4; padding-left:20px;">
+            <h3 style="font-size:24px; font-weight:800; margin-bottom:10px;">숙박 예약</h3>
+            <p style="color:#555;">원하시는 호텔을 선택하고 특별한 하루를 완성하세요.</p>
         </div>
-      </div>`;
-  });
-  html += `</div>`;
-  document.getElementById("content-area").innerHTML = html;
+        <div class="filters">
+            <button class="filter-btn" onclick="sortHotels('low')">가격 낮은순</button>
+            <button class="filter-btn" onclick="sortHotels('high')">가격 높은순</button>
+        </div>
+        <div class="hotel-grid">`;
+
+    data.forEach(h => {
+        html += `
+            <div class="hotel-card">
+                <div class="hotel-img" style="background-image:url('${h.img}')"></div>
+                <div class="hotel-info">
+                    <h3>${h.name}</h3>
+                    <p style="color:#f1c40f; margin-bottom:15px;">${h.star}</p>
+                    <span class="price-tag">₩ ${h.price.toLocaleString()}~</span>
+                    <button class="btn-reserve" onclick="renderDetailView(${h.id})">예약하기</button>
+                </div>
+            </div>`;
+    });
+    html += `</div>`;
+    document.getElementById("content-area").innerHTML = html;
 }
-// 4. 메인 화면 전환 로직
+
+function sortHotels(type) {
+    const sorted = [...HOTEL_DATA].sort((a, b) => type === 'low' ? a.price - b.price : b.price - a.price);
+    renderBookingContent(sorted);
+}
+
+// [2. 호텔 상세 페이지 렌더링]
+function renderDetailView(id) {
+    const hotel = HOTEL_DATA.find(h => h.id == id);
+    window.scrollTo(0,0);
+    document.getElementById('heroTitle').innerText = hotel.name;
+    document.getElementById('heroSub').innerText = hotel.star;
+    document.getElementById('payment-bar').style.display = 'flex';
+
+    let html = `
+        <div class="section-card">
+            <h2 style="font-size: 28px;">${hotel.name}</h2>
+            <div style="color: #ffb800; margin: 10px 0;">${hotel.star}</div>
+            <p style="color: #666; font-size: 15px; margin-bottom: 20px;">${hotel.desc}</p>
+            <img src="${hotel.img}" style="width:100%; height:400px; object-fit:cover; border-radius:15px;">
+        </div>
+        <div class="booking-layout">
+            <div class="cal-box"><div class="section-card"><h3>📅 일정 선택</h3><div id="inline-calendar"></div></div></div>
+            <div id="room-area" class="room-box section-card" style="opacity: 0.3; pointer-events: none;">
+                <h3>🛏️ 객실 및 옵션 선택</h3>
+                <div id="room-list" style="margin-top:20px;"></div>
+            </div>
+        </div>
+        <div class="section-card">
+            <h3>📞 고객센터 및 위치</h3>
+            <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:30px; margin-top:20px;">
+                <iframe class="map-frame" src="https://maps.google.com/maps?q=${encodeURIComponent(hotel.location)}&t=&z=14&ie=UTF8&iwloc=&output=embed" frameborder="0"></iframe>
+                <ul style="list-style:none;">
+                    <li style="margin-bottom:15px;"><strong>주소:</strong> ${hotel.location}</li>
+                    <li style="margin-bottom:15px;"><strong>전화:</strong> ${hotel.tel || '02-1234-5678'}</li>
+                    <li><strong>웹사이트:</strong> <a href="#" style="color:#bd2aa4; text-decoration:none; font-weight:700;">공식 홈페이지</a></li>
+                </ul>
+            </div>
+        </div>`;
+    document.getElementById('content-area').innerHTML = html;
+
+    const list = document.getElementById('room-list');
+    Object.entries(hotel.roomPrices).forEach(([type, price]) => {
+        const cleanId = type.replace(/\s/g, '');
+        list.innerHTML += `
+            <div class="room-card" id="card-${cleanId}" onclick="selRoom('${type}', ${price})">
+                <img src="${hotel.img}" class="room-img-sm"><div style="flex:1"><h4>${type}</h4><div style="color:#bd2aa4; font-weight:700;">₩${price.toLocaleString()}</div></div><div>❯</div>
+            </div>
+            <div class="option-panel" id="panel-${cleanId}">
+              <div class="inner-acc">
+                <div class="inner-acc-head" onclick="toggleAcc(this)">
+                  <span>📜 객실 세부정보 및 안내</span>
+                  <span>▼</span>
+                </div>
+                <div class="inner-acc-body">
+                  • 프리미엄 매트리스 및 침구류 제공<br>
+                  • 무료 와이파이 및 어메니티 세트<br>
+                  • 체크인 15:00 / 체크아웃 11:00
+                </div>
+              </div>
+                <div class="counter-row"><span>투숙 인원 (최대 10명)</span><div class="cnt-btns"><button onclick="cnt('g',-1)">-</button><strong class="g-cnt">1</strong><button onclick="cnt('g',1)">+</button></div></div>
+                <div class="counter-row"><span>조식 추가 (1인/2만원)</span><div class="cnt-btns"><button onclick="cnt('b',-1)">-</button><strong class="b-cnt">0</strong><button onclick="cnt('b',1)">+</button></div></div>
+            </div>`;
+    });
+
+    flatpickr("#inline-calendar", { mode: "range", inline: true, onChange: (dates) => { 
+        if(dates.length===2) { 
+            state.nights = Math.ceil(Math.abs(dates[1]-dates[0])/86400000); 
+            document.getElementById('room-area').style.opacity="1"; 
+            document.getElementById('room-area').style.pointerEvents="auto"; 
+            updateUI(); 
+        } 
+    }});
+}
+
+function selRoom(type, price) {
+    const cleanId = type.replace(/\s/g, '');
+    const targetPanel = document.getElementById(`panel-${cleanId}`);
+    const targetCard = document.getElementById(`card-${cleanId}`);
+
+    // 현재 클릭한 패널이 이미 열려있는지 확인
+    const isOpen = targetPanel.classList.contains('show');
+
+    // 1. 모든 패널과 카드를 초기화 (일단 다 닫기)
+    document.querySelectorAll('.option-panel').forEach(p => p.classList.remove('show'));
+    document.querySelectorAll('.room-card').forEach(c => c.classList.remove('active'));
+
+    // 2. 이미 열려있던 게 아니라면 새로 열기
+    if (!isOpen) {
+        targetPanel.classList.add('show');
+        targetCard.classList.add('active');
+        state.roomPrice = price;
+    } else {
+        // 이미 열려있던 걸 다시 눌렀다면 닫힌 상태 유지하고 가격 초기화
+        state.roomPrice = 0;
+    }
+
+    updateUI();
+}
+
+function cnt(t, v) {
+    if(t==='g') state.guests = Math.min(10, Math.max(1, state.guests+v));
+    else state.bf = Math.max(0, state.bf+v);
+    document.querySelectorAll('.g-cnt').forEach(el => el.innerText = state.guests);
+    document.querySelectorAll('.b-cnt').forEach(el => el.innerText = state.bf);
+    updateUI();
+}
+
+function updateUI() {
+    const total = (state.nights > 0 && state.roomPrice > 0) ? (state.roomPrice + (state.bf * 20000)) * state.nights : 0;
+    document.getElementById('totalAmount').innerText = total.toLocaleString();
+}
+
+// [3. 메인 섹션 전환 기능]
 function showSection(key) {
     const area = document.getElementById("content-area");
-    const heroTitle = document.getElementById("heroTitle");
-    const heroSub = document.getElementById("heroSub");
-  
-  heroTitle.innerText = SECTION_TITLE[key].title;
-  heroSub.innerText = SECTION_TITLE[key].sub;
+    document.getElementById('payment-bar').style.display = 'none';
+    document.getElementById('heroTitle').innerText = SECTION_TITLE[key].title;
+    document.getElementById('heroSub').innerText = SECTION_TITLE[key].sub;
 
-if (key === 'booking') {
+    if (key === 'booking') {
         renderBookingContent();
-    } else if (key === 'faq') {
-        // FAQ 전용 렌더링 함수 호출
-        renderFaqContent();
     } else if (key === 'login') {
-    area.innerHTML = `
-    <div class="sub-card">
-        <h2 style="margin-bottom:20px; font-weight:800;">로그인</h2>
-        <p style="margin-bottom:25px; color:#666; font-size:14px;">이메일과 비밀번호를 입력해주세요.</p>
-        
-        <input type="text" id="loginId" class="input-field" placeholder="이메일">
-        <input type="password" id="loginPw" class="input-field" placeholder="비밀번호">
-        
-        <button class="btn-reserve" style="background:#bd2aa4; margin-top:20px;" onclick="checkLogin()">
-          조회하기
-        </button>
-        
-        <div style="margin-top:20px; font-size:13px; color:#888;">
-          <a href="#" style="color:#888; text-decoration:none; margin:0 10px;">비밀번호 찾기</a>
-        </div>
-    </div>`;
-} else if (key === 'cs') {
-    area.innerHTML = `
-      <div class="sub-card" style="max-width:800px; padding:0; overflow:hidden;">
-          <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=800&q=80" 
-               alt="Customer Support" 
-               style="width:100%; height:auto; display:block;">
-      </div>`;
+        area.innerHTML = `
+            <div class="sub-card">
+                <h2 style="margin-bottom:20px; font-weight:800;">로그인</h2>
+                <p style="margin-bottom:25px; color:#666; font-size:14px;">이메일과 비밀번호를 입력해주세요.</p>
+                <input type="text" id="loginId" class="input-field" placeholder="이메일">
+                <input type="password" id="loginPw" class="input-field" placeholder="비밀번호">
+                <button class="btn-reserve" style="background:#bd2aa4; margin-top:20px;" onclick="checkLogin()">조회하기</button>
+                <div style="margin-top:20px; font-size:13px; color:#888;">
+                    <a href="#" style="color:#888; text-decoration:none; margin:0 10px;">비밀번호 찾기</a>
+                </div>
+            </div>`;
+    } else if (key === 'cs') {
+        area.innerHTML = `
+            <div class="sub-card" style="max-width:800px; padding:0; overflow:hidden;">
+                <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=800&q=80" style="width:100%;">
+            </div>`;
+    } else if (key === 'faq') {
+        renderFaqContent();
     }
-
+    
     const sideMenu = document.getElementById("sideMenu");
-    if(sideMenu.classList.contains("open")) {
-        sideMenu.classList.remove("open");
-    }
-
-    window.scrollTo(0, 0);
+    if(sideMenu.classList.contains("open")) sideMenu.classList.remove("open");
+    window.scrollTo(0,0);
 }
 
-
-
+// [4. 예약 조회 및 로그인 처리]
 async function checkLogin() {
     const email = document.getElementById('loginId').value;
     const pw = document.getElementById('loginPw').value;
-
-    const response = await fetch('/api/check-reservation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, password: pw })
+    // 실제 서버 엔드포인트에 맞게 수정 필요
+    const response = await fetch('/api/check-reservation', { 
+        method:'POST', 
+        headers:{'Content-Type':'application/json'}, 
+        body:JSON.stringify({email, password:pw}) 
     });
-
     const result = await response.json();
     if (result.success) {
-        // 성공 시에만 해당 데이터로 이동
-        location.href = `result.html?name=${result.data.guestName}...`;
+        location.href = `result.html?name=${result.data.guestName}`;
     } else {
         alert(result.message);
     }
@@ -199,14 +317,12 @@ async function checkLogin() {
 
 function updateHeader() {
     const userJson = sessionStorage.getItem('loggedInUser');
-    const authArea = document.getElementById('auth-area'); // 헤더의 로그인 버튼 영역 ID
-
-    if (userJson) {
+    const authArea = document.getElementById('auth-area');
+    if (userJson && authArea) {
         const user = JSON.parse(userJson);
         authArea.innerHTML = `
-            <span><b>${user.name}</b>님 환영합니다</span>
-            <button onclick="handleLogout()">로그아웃</button>
-        `;
+            <span style="font-size:14px;"><b>${user.name}</b>님</span>
+            <button onclick="handleLogout()" style="padding:4px 8px; font-size:11px; margin-left:10px; cursor:pointer;">로그아웃</button>`;
     }
 }
 
@@ -216,61 +332,66 @@ function handleLogout() {
     location.reload();
 }
 
-// 페이지 로드 시 실행
-window.onload = updateHeader;
-
-// FAQ 렌더링 함수 (FAQ_DATA 사용)
+// [5. FAQ 검색 기능]
 function renderFaqContent(query = '') {
-    const q = (query || '').trim().toLowerCase();
-    const filtered = q
-      ? FAQ_DATA.filter(item =>
-          (item.q || '').toLowerCase().includes(q) ||
-          (item.a || '').toLowerCase().includes(q)
-        )
-      : FAQ_DATA;
-
+    const q = query.toLowerCase();
+    const filtered = FAQ_DATA.filter(item => 
+        item.q.toLowerCase().includes(q) || item.a.toLowerCase().includes(q)
+    );
+    
     let html = `
-      <div class="faq-search-wrap">
-        <input id="faqSearch" class="faq-search" type="text" placeholder="FAQ 검색 (질문/답변)" value="${(query || '').replace(/"/g, '&quot;')}">
-      </div>
-      <div style="max-width:800px; margin: 0 auto;">
-    `;
-
+        <div class="faq-search-wrap">
+            <input oninput="renderFaqContent(this.value)" class="faq-search" placeholder="궁금한 내용을 검색하세요" value="${query}">
+        </div>
+        <div style="max-width:800px; margin: 0 auto;">`;
+    
     if (filtered.length === 0) {
-      html += `<div style="padding: 30px 0; color:#888; text-align:center;">검색 결과가 없습니다.</div>`;
+        html += `<div style="padding: 30px 0; color:#888; text-align:center;">검색 결과가 없습니다.</div>`;
     } else {
-      filtered.forEach((item, index) => {
-        html += `
-          <div style="border-bottom:1px solid #eee; padding: 20px 0; cursor:pointer;" onclick="toggleFaqAnswer(${index})">
-              <div style="font-weight:700;">Q. ${item.q}</div>
-              <div id="ans-${index}" style="display:none; margin-top:10px; color:#666; background:#f9f9f9; padding:15px; border-radius:10px;">
-                  A. ${item.a}
-              </div>
-          </div>`;
-      });
+        filtered.forEach((item, index) => {
+            html += `
+                <div style="background:#fff; border-radius:12px; margin-bottom:10px; padding:20px; cursor:pointer; border:1px solid #eee;" 
+                     onclick="this.children[1].style.display=this.children[1].style.display==='none'?'block':'none'">
+                    <div style="font-weight:700;">Q. ${item.q}</div>
+                    <div style="display:none; margin-top:15px; color:#666; line-height:1.6; background:#f9f9f9; padding:15px; border-radius:10px;">
+                        A. ${item.a}
+                    </div>
+                </div>`;
+        });
     }
-
-    html += `</div>`;
-    const area = document.getElementById("content-area");
-    area.innerHTML = html;
-
-    const input = document.getElementById('faqSearch');
-    if (input) {
-      input.addEventListener('input', (e) => {
-        renderFaqContent(e.target.value);
-      });
-    }
+    document.getElementById("content-area").innerHTML = html + `</div>`;
 }
 
-function toggleFaqAnswer(index) {
-  const a = document.getElementById(`ans-${index}`);
-  if (!a) return;
-  a.style.display = a.style.display === 'none' ? 'block' : 'none';
+function toggleAcc(el) {
+    // 클릭 이벤트가 부모 룸카드로 퍼져서 카드가 닫히는 것을 방지
+    if (window.event) window.event.stopPropagation();
+    
+    const body = el.nextElementSibling;
+    body.classList.toggle('open');
+    
+    const icon = el.querySelector('span:last-child');
+    icon.innerText = body.classList.contains('open') ? '▲' : '▼';
 }
 
-// 최초 실행
-showSection('booking');
+function toggleNested(el, isDeep = false) {
+  // 버블링 방지 : 클릭이 부모 'room-card'로 전달되어 선택이 해제 되는 것을 막음
+  if (window.event) window.event.stopPropagation();
+
+  const body= el.nextElementSibling;
+  body.classList.toggle('open');
+
+  const icon= el.querySelector('span:last-child');
+  if (isDeep) {
+    icon.innerText = body.classList.contains('open') ? '-' : '+';
+  } else {
+    icon.innerText = body.classList.contains('open') ? '▲' : '▼';
+  }
+}
+// 페이지 로드 시 초기 실행
+window.onload = () => {
+    updateHeader();
+    showSection('booking');
+};
 </script>
-
 </body>
 </html>
