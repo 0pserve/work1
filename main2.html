@@ -653,6 +653,7 @@ const countryOptions = COUNTRY_DATA.map(c => `<option value="${c.code}">${c.name
 
 //상세 결제 페이지 
 function renderPaymentView() {
+    const hotel = HOTEL_DATA.find(h => h.id == state.currentHotelId);
     // 0. 방어 로직 (날짜/객실 미선택 시)
     if (state.nights === 0 || state.roomPrice === 0) {
         alert("일정 및 객실을 먼저 선택해 주세요.");
@@ -828,5 +829,6 @@ window.onload = () => {
 </body>
 
 </html>
+
 
 
