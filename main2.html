@@ -2,9 +2,9 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>booked - Integrated</title>
+<title>MAIN</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="data.js"></script>
@@ -27,7 +27,7 @@
   /* [히어로 배너] */
   .hero { 
     height: 300px; 
-    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600'); 
+    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('./asset/hero_banner.jpg'); 
     background-size: cover; background-position: center; 
     display: flex; align-items: center; justify-content: center; color: #fff; text-align: center; 
   }
@@ -104,7 +104,9 @@
 
 <body>
 <div class="header">
-    <h1 onclick="location.reload()">Booked</h1>
+    <div onclick="location.reload()" style="cursor:pointer; display:flex; align-items:center; padding: 10px 0;">
+        <img src="./asset/logo.jpg" alt="Logo" style="height:40px; width:auto; object-fit:contain;">
+    </div>
     <div style="display: flex; align-items: center; gap: 15px;">
         <div id="auth-area"></div>
         <div class="menu-trigger" onclick="toggleMenu()">☰</div>
@@ -127,7 +129,6 @@
 
 <div id="payment-bar" class="payment-fix" style="display:none;">
     <div><span style="color:#888; font-size:14px;">최종 결제 금액</span><br><span id="totalAmount" style="font-size: 28px; font-weight: 800; color: #bd2aa4;">0</span>원</div>
-    // 결제바 버튼 코드 수정 (HTML 부분)
     <button class="btn-reserve" style="width:220px; margin:0; background:#bd2aa4;" onclick="renderPaymentView()">예약 신청하기</button>
 </div>
 
@@ -146,7 +147,7 @@ function renderBookingContent(data = HOTEL_DATA) {
     let html = `
         <div style="margin-bottom:40px; border-left:4px solid #bd2aa4; padding-left:20px;">
             <h3 style="font-size:24px; font-weight:800; margin-bottom:10px;">숙박 예약</h3>
-            <p style="color:#555;">원하시는 호텔을 선택하고 특별한 하루를 완성하세요.</p>
+            <p style="color:#555;">🔈️[알 림] 숙박확인서, 인보이스, 카드결제 영수증은 상단 메인 메뉴(≡) 중 예약조회에서 직접 발급하실 수 있습니다. </p>
         </div>
         <div class="filters">
             <button class="filter-btn" onclick="sortHotels('low')">가격 낮은순</button>
@@ -159,9 +160,13 @@ function renderBookingContent(data = HOTEL_DATA) {
             <div class="hotel-card">
                 <div class="hotel-img" style="background-image:url('${h.img}')"></div>
                 <div class="hotel-info">
-                    <h3>${h.name}</h3>
+                    <h3 style = "font-size: 18px; font-weight: 700 !important; margin: 0; white-space: nowrap; min-width: 0;">${h.name}</h3>
                     <p style="color:#f1c40f; margin-bottom:15px;">${h.star}</p>
-                    <span class="price-tag">₩ ${h.price.toLocaleString()}~</span>
+                    <h4>${h.distance}</h4>
+                    <hr style="border:0; border-top:1px solid #eee; margin:12px 0;">
+                    <div style="text-align: right;">
+                        <span class="price-tag">₩ ${h.price.toLocaleString()}~</span>
+                    </div>
                     <button class="btn-reserve" onclick="renderDetailView(${h.id})">예약하기</button>
                 </div>
             </div>`;
@@ -179,13 +184,14 @@ function sortHotels(type) {
 function renderDetailView(id) {
     const hotel = HOTEL_DATA.find(h => h.id == id);
     window.scrollTo(0,0);
-    document.getElementById('heroTitle').innerText = hotel.name;
-    document.getElementById('heroSub').innerText = hotel.star;
+    document.getElementById('heroTitle').innerText = 'Title';
+    document.getElementById('heroSub').innerText = 'Sub Title';
     document.getElementById('payment-bar').style.display = 'flex';
 
     let html = `
         <div class="section-card">
             <h2 style="font-size: 28px;">${hotel.name}</h2>
+            <h3">${hotel.engname}</h3>
             <div style="color: #ffb800; margin: 10px 0;">${hotel.star}</div>
             <p style="color: #666; font-size: 15px; margin-bottom: 20px;">${hotel.desc}</p>
             <img src="${hotel.img}" style="width:100%; height:400px; object-fit:cover; border-radius:15px;">
@@ -198,50 +204,117 @@ function renderDetailView(id) {
             </div>
         </div>
         <div class="section-card">
-            <h3>📞 고객센터 및 위치</h3>
+            <h3>
+                <span style="color: #2ecc71; font-weight: bold;">체크인</span> 15:00 &nbsp;&nbsp; 
+                <span style="color: #2ecc71; font-weight: bold;">체크아웃</span> 11:00
+            </h3>
             <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:30px; margin-top:20px;">
                 <iframe class="map-frame" src="https://maps.google.com/maps?q=${encodeURIComponent(hotel.location)}&t=&z=14&ie=UTF8&iwloc=&output=embed" frameborder="0"></iframe>
                 <ul style="list-style:none;">
                     <li style="margin-bottom:15px;"><strong>주소:</strong> ${hotel.location}</li>
-                    <li style="margin-bottom:15px;"><strong>전화:</strong> ${hotel.tel || '02-1234-5678'}</li>
-                    <li><strong>웹사이트:</strong> <a href="#" style="color:#bd2aa4; text-decoration:none; font-weight:700;">공식 홈페이지</a></li>
+                    <li style="margin-bottom:15px;"><strong>전화 번호:</strong> ${hotel.tel || '02-1234-5678'}</li>
+                    <li style="margin-bottom:15px;"><strong>팩스 번호:</strong>
+                    <li><strong>홈페이지:</strong> <a href="https://www.high1.com/www/index.do" style="color:#bd2aa4; text-decoration:none; font-weight:700;">바로가기</a></li>
                 </ul>
             </div>
+        
+
         </div>`;
+
+        
     document.getElementById('content-area').innerHTML = html;
 
-    const list = document.getElementById('room-list');
-    Object.entries(hotel.roomPrices).forEach(([type, price]) => {
-        const cleanId = type.replace(/\s/g, '');
-        list.innerHTML += `
-            <div class="room-card" id="card-${cleanId}" onclick="selRoom('${type}', ${price})">
-                <img src="${hotel.img}" class="room-img-sm"><div style="flex:1"><h4>${type}</h4><div style="color:#bd2aa4; font-weight:700;">₩${price.toLocaleString()}</div></div><div>❯</div>
+// [2. 호텔 상세 페이지 렌더링 내 room-list 생성 부분]
+const list = document.getElementById('room-list');
+list.innerHTML = ''; // 기존 리스트 초기화
+
+// 숙박 기간 텍스트 생성 (선택된 날짜 기반)
+Object.entries(hotel.roomPrices).forEach(([type, price]) => {
+    const cleanId = type.replace(/\s/g, '');
+    
+    const specificLink = (hotel.roomLinks && hotel.roomLinks[type]) 
+                         ? hotel.roomLinks[type]
+                         :"https://www.high1.com";
+    // 1. 객실 타입별 인원 설정 (의도하신 부분)
+    let capacity = "";
+    if (type.includes("트리플")) {
+        capacity = "기준인원 3명 / 최대인원 3명";
+    } else if (type.includes("더블") || type.includes("트윈")) {
+        capacity = "기준인원 2명 / 최대인원 2명";
+    } else if (type.includes("패밀리") || type.includes("온돌")) {
+        capacity = "기준인원 4명 / 최대인원 4명";
+    } else if (type.includes("디럭스") || type.includes("그랜드")) {
+        capacity = "기준인원 5명 / 최대인원 7명";
+    } else {
+        capacity = "기준인원 2명 / 최대인원 2명"; // 기본값
+    }
+
+    const roomNotice = `${capacity}`; // 화면에 표시될 문구
+
+    // 2. 날짜 정보 (몇 박, 며칠~며칠)
+    const dateInfo = state.nights > 0 
+        ? `${state.nights}박 (${state.checkIn} ~ ${state.checkOut})` 
+        : "날짜를 선택해 주세요";
+
+    list.innerHTML += `
+        <div class="room-card" id="card-${cleanId}" onclick="selRoom('${type}', ${price})">
+            <img src="${hotel.roomImgs[type] || hotel.img}" class="room-img-sm">
+            <div style="flex:1">
+                <h4>${type}</h4>
+                <div style="color:#bd2aa4; font-weight:700; margin-top:4px;">₩${price.toLocaleString()}</div>
             </div>
-            <div class="option-panel" id="panel-${cleanId}">
-              <div class="inner-acc">
-                <div class="inner-acc-head" onclick="toggleAcc(this)">
-                  <span>📜 객실 세부정보 및 안내</span>
-                  <span>▼</span>
+            <div>❯</div>
+        </div>
+
+        <div class="option-panel" id="panel-${cleanId}">
+            <div style="padding: 10px 20px 5px 20px;">
+                <div style="font-size:13px; color:#555; margin-bottom:4px; font-weight:600;">👥 ${capacity}</div>
+                <div class="date-info-text" style="font-size:13px; color:#bd2aa4; font-weight:600;">
+                    📅 ${state.nights > 0 ? state.nights + '박 (' + state.checkIn + ' ~ ' + state.checkOut + ')' : '날짜를 선택해 주세요'}
                 </div>
-                <div class="inner-acc-body">
-                  • 프리미엄 매트리스 및 침구류 제공<br>
-                  • 무료 와이파이 및 어메니티 세트<br>
-                  • 체크인 15:00 / 체크아웃 11:00
-                </div>
-              </div>
-                <div class="counter-row"><span>투숙 인원 (최대 10명)</span><div class="cnt-btns"><button onclick="cnt('g',-1)">-</button><strong class="g-cnt">1</strong><button onclick="cnt('g',1)">+</button></div></div>
-                <div class="counter-row"><span>조식 추가 (1인/2만원)</span><div class="cnt-btns"><button onclick="cnt('b',-1)">-</button><strong class="b-cnt">0</strong><button onclick="cnt('b',1)">+</button></div></div>
-            </div>`;
-    });
+            </div>
+        
+          <div class="inner-acc">
+            <div class="inner-acc-head" onclick="toggleAcc(this)">
+              <span>객실 상세보기</span>
+              <span>▼</span>
+            </div>
+            <div class="inner-acc-body">
+              <div style="margin-bottom:10px; line-height:1.6;">${hotel.desc_detail}</div>
+              <hr style="margin:10px 0; border:0; border-top:1px solid #eee;">
+              <a href="${specificLink}" target="_blank" style="color:#bd2aa4; text-decoration:underline; font-size:13px;">
+                >> 객실 자세히 보기
+              </a>
+            </div>
+          </div>
+          <div class="counter-row"><span>객실 수량</span><div class="cnt-btns"><button onclick="cnt('g',-1)">-</button><strong class="g-cnt">1</strong><button onclick="cnt('g',1)">+</button></div></div>
+          <div class="counter-row"><span>추가 조식(1인/박당)</span><div class="cnt-btns"><button onclick="cnt('b',-1)">-</button><strong class="b-cnt">0</strong><button onclick="cnt('b',1)">+</button></div></div>
+        </div>`;
+});
 
     flatpickr("#inline-calendar", { mode: "range", inline: true, onChange: (dates) => { 
         if(dates.length===2) { 
             state.nights = Math.ceil(Math.abs(dates[1]-dates[0])/86400000); 
+            // [추가] 시작일과 종료일을 state에 저장
+            state.checkIn = dates[0].toLocaleDateString();
+            state.checkOut = dates[1].toLocaleDateString();
             document.getElementById('room-area').style.opacity="1"; 
-            document.getElementById('room-area').style.pointerEvents="auto"; 
+            document.getElementById('room-area').style.pointerEvents="auto";
+            updateRoomDateInfo();
             updateUI(); 
         } 
     }});
+}
+
+function updateRoomDateInfo() {
+    // 모든 객실 카드의 날짜 정보가 들어가는 div를 찾아서 글자만 바꿉니다.
+    // (이 기능을 쓰려면 HTML 생성 시 해당 부분에 class="date-info-text"를 넣어줘야 합니다)
+    const dateElements = document.querySelectorAll('.date-info-text');
+    const newText = `📅 ${state.nights}박 (${state.checkIn} ~ ${state.checkOut})`;
+    
+    dateElements.forEach(el => {
+        el.innerText = newText;
+    });
 }
 
 function selRoom(type, price) {
@@ -278,7 +351,11 @@ function cnt(t, v) {
 }
 
 function updateUI() {
-    const total = (state.nights > 0 && state.roomPrice > 0) ? (state.roomPrice + (state.bf * 20000)) * state.nights : 0;
+    // 수식: ((객실가격 * 투숙인원) + (조식가격 * 조식인원)) * 숙박일수
+    const total = (state.nights > 0 && state.roomPrice > 0) 
+                  ? ((state.roomPrice * state.guests) + (state.bf * 20000)) * state.nights 
+                  : 0;
+    
     document.getElementById('totalAmount').innerText = total.toLocaleString();
 }
 
