@@ -680,7 +680,7 @@ function renderPaymentView() {
             </div>
             <div class="inner-acc">
                 <div class="inner-acc-head" onclick="toggleAcc(this)"><span>🔍 객실 세부 설명</span><span>▼</span></div>
-                <div class="inner-acc-body">객실 내 무료 와이파이, 어메니티 포함, 금연실 기준입니다.</div>
+                <div class="inner-acc-body">${hotel.desc_detail || '객실 상세 정보가 준비 중입니다.'}</div>
             </div>
             <div style="padding:15px; background:#fdf5fc; border:1px solid #bd2aa4; border-radius:10px; color:#bd2aa4; font-weight:600;">
                 ✅ 무료취소 가능 기간: ${state.checkIn ? getCancelDate(state.checkIn) : '체크인 3일 전'}까지
@@ -828,3 +828,4 @@ window.onload = () => {
 </body>
 
 </html>
+
