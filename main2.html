@@ -675,7 +675,7 @@ function renderPaymentView() {
                 
                 <img src="${hotel?.roomImgs?.[state.roomType] || hotel?.img || ''}" style="width:830px; height:450px; border-radius:10px; object-fit:cover;display: block;">
                 <div>
-                    <h4 style = "font-size: 28px; font-weight: 800; color: #333; margin-bottom: 20px; letter-spacing: -1px;">${HOTEL_DATA.find(h => h.id === state.currentHotelId)?.name}<br>${state.roomType}</h4>
+                    <br><h4 style = "font-size: 28px; font-weight: 800; color: #333; margin-bottom: 20px; letter-spacing: -1px;">${HOTEL_DATA.find(h => h.id === state.currentHotelId)?.name}<br>${state.roomType}</h4>
                     <p style="font-size: 16px; color: #333; font-weight: 600;"><br>${state.nights}박<br><br>체크인: ${state.checkIn || '-'}<br><br>체크아웃: ${state.checkOut || '-'}</p>
                     <p style="font-size: 16px; color: #333; font-weight: 600;"><br>조식 추가: ${state.bf}개</p>
                 </div>
@@ -697,11 +697,12 @@ function renderPaymentView() {
         <div class="section-card">
             <h3 style="margin-bottom:20px;">🔑 로그인 정보</h3>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-                <input type="email" class="input-field" placeholder="이메일">
-                <input type="password" class="input-field" placeholder="비밀번호">
-                <input type="password" class="input-field" placeholder="비밀번호 확인">
-                <button class="filter-btn" style="height:50px; margin-top:10px;">로그인정보 확인하기</button>
+                <input type="email" id ="loginEmail" class="input-field" placeholder="이메일">
+                <input type="password" id = "loginPw" class="input-field" placeholder="비밀번호">
+                <input type="password" id = "loginPwConfirm" class="input-field" placeholder="비밀번호 확인">
+                <button type="button" class="filter-btn" style="height:50px; margin-top:10px;" onclick="validateLogin()">로그인정보 확인하기</button>
             </div>
+            <div id="loginMsg" style="margin-top:10px; font-size:14px; font-weight:bold;"></div>
         </div>
 
         <div class="section-card">
@@ -742,14 +743,39 @@ function renderPaymentView() {
             <h3 style="margin-bottom:20px; border-left: 4px solid #bd2aa4; padding-left: 15px;">📄 약관 동의</h3>
             <div style="text-align:left; background:#f8f9fb; padding:20px; border-radius:10px; border: 1px solid #eee;">
                 <label style="font-weight:bold; display:block; margin-bottom:10px; cursor:pointer;">
-                    <input type="checkbox" onclick="allAgree(this)"> 모두 동의
+                    <input type="checkbox" id="all-check" onclick="allAgree(this)"> 모두 동의
                 </label>
                 <hr style="margin-bottom:12px; border:0; border-top:1px solid #ddd;">
-                <label style="display:block; font-size:13px; margin-bottom:8px; cursor:pointer;"><input type="checkbox" class="agree-chk"> 개인정보 수집 및 이용 동의 (필수)</label>
-                <label style="display:block; font-size:13px; margin-bottom:8px; cursor:pointer;"><input type="checkbox" class="agree-chk"> 고유식별정보 수집 이용 동의 (필수)</label>
-                <label style="display:block; font-size:13px; margin-bottom:8px; cursor:pointer;"><input type="checkbox" class="agree-chk"> 개인정보 제3자 제공 동의 (필수)</label>
+        
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <label style="font-size:15px; cursor:pointer;"><input type="checkbox" class="agree-chk"> 개인정보 수집 및 이용 동의 (필수)</label>
+                    <span style="font-size:12px; color:#999; text-decoration:underline; cursor:pointer;" onclick="showTerms('privacy')">전문보기</span>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <label style="font-size:15px; cursor:pointer;"><input type="checkbox" class="agree-chk"> 고유식별정보 수집 이용 동의 (필수)</label>
+                    <span style="font-size:12px; color:#999; text-decoration:underline; cursor:pointer;" onclick="showTerms('identification')">전문보기</span>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <label style="font-size:15px; cursor:pointer;"><input type="checkbox" class="agree-chk"> 개인정보 위탁 동의 (필수)</label>
+                    <span style="font-size:12px; color:#999; text-decoration:underline; cursor:pointer;" onclick="showTerms('consignment')">전문보기</span>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <label style="font-size:15px; cursor:pointer;"><input type="checkbox" class="agree-chk"> 개인정보 제3자 제공 동의 (필수)</label>
+                    <span style="font-size:12px; color:#999; text-decoration:underline; cursor:pointer;" onclick="showTerms('thirdparty')">전문보기</span>
+                </div>
             </div>
         </div>
+
+<div id="termsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+    <div style="background:#fff; width:90%; max-width:500px; padding:30px; border-radius:10px; position:relative;">
+        <h4 id="termsTitle" style="margin-bottom:15px;">약관 전문</h4>
+        <div id="termsContent" style="height:300px; overflow-y:auto; border:1px solid #eee; padding:15px; font-size:13px; color:#666; line-height:1.6; white-space:pre-wrap;"></div>
+        <button onclick="closeTerms()" style="width:100%; margin-top:20px; height:45px; background:#333; color:#fff; border:none; border-radius:5px; cursor:pointer;">닫기</button>
+    </div>
+</div>
 
         <div class="section-card" style="background:#fff; border:1px solid #ddd; padding:30px; border-radius:10px;">
             <h3 style="margin-bottom:20px; border-left: 4px solid #bd2aa4; padding-left: 15px;">💳 결제 정보</h3>
@@ -800,7 +826,9 @@ function renderPaymentView() {
                     <span style="color: #888; font-size: 14px;">최종 결제 금액</span>
                     <h2 style="color: #bd2aa4; font-size: 32px; margin-top: 5px;">₩ ${document.getElementById('totalAmount').innerText}</h2>
                 </div>
-                <button class="btn-reserve" style="background:#bd2aa4; color:white; width:100%; height:60px; font-size:20px; border-radius:8px; border:none; font-weight:bold; cursor:pointer;" onclick="submitFinal()">예약하기</button>
+                <button class="btn-reserve" style="background:#bd2aa4; color:white; width:100%; height:60px; font-size:20px; border-radius:8px; border:none; font-weight:bold; cursor:pointer;" onclick="requestHotelBooking()">
+                    예약하기
+                </button>
             </div>
         </div>
 
@@ -812,13 +840,116 @@ function renderPaymentView() {
     window.scrollTo(0,0);
 }
 
+// 1. 모두 동의 기능
+window.allAgree = function(target) {
+    const checkboxes = document.querySelectorAll('.agree-chk');
+    checkboxes.forEach((checkbox) => {
+        checkbox.checked = target.checked;
+    });
+};
+
+// 2. 개별 체크박스 클릭 시 '모두 동의' 체크박스 상태 업데이트
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('agree-chk')) {
+        const allBtn = document.getElementById('all-check');
+        const total = document.querySelectorAll('.agree-chk').length;
+        const checked = document.querySelectorAll('.agree-chk:checked').length;
+        allBtn.checked = (total === checked);
+    }
+});
+
+// 3. 전문보기 팝업 열기
+window.showTerms = function(content) {
+    document.getElementById('termsContent').innerText = content;
+    document.getElementById('termsModal').style.display = 'flex';
+};
+
+// 4. 전문보기 팝업 닫기
+window.closeTerms = function() {
+    document.getElementById('termsModal').style.display = 'none';
+};
+
+// 전문보기 함수
+window.showTerms = function(type) {
+    // data.js에 저장된 TERMS_DATA를 참조합니다.
+    const content = window.TERMS_DATA[type]; 
+    
+    const titles = {
+        privacy: "개인정보 수집 및 이용 동의",
+        identification: "고유식별정보 수집 이용 동의",
+        consignment: "개인정보 위탁 동의",
+        thirdparty: "개인정보 제3자 제공 동의"
+    };
+
+    if (content) {
+        document.getElementById('termsTitle').innerText = titles[type];
+        document.getElementById('termsContent').innerText = content;
+        document.getElementById('termsModal').style.display = 'flex';
+    } else {
+        alert("내용을 불러올 수 없습니다.");
+    }
+};
+
+window.validateLogin = function() {
+    const emailInput = document.getElementById('loginEmail');
+    const pwInput = document.getElementById('loginPw');
+    const pwConfirmInput = document.getElementById('loginPwConfirm');
+    const btn = document.querySelector('.filter-btn'); // 버튼 선택
+    const msgArea = document.getElementById('loginMsg');
+
+    const email = emailInput.value;
+    const pw = pwInput.value;
+    const pwConfirm = pwConfirmInput.value;
+
+    // 1. 이메일 형식 체크
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+        msgArea.innerText = "❌ 올바른 이메일 형식이 아닙니다. 다시 확인해 주세요.";
+        msgArea.style.color = "#e74c3c";
+        return;
+    }
+
+    // 2. 비밀번호 일치 체크
+    if (pw === "" || pwConfirm === "") {
+        msgArea.innerText = "❌ 비밀번호를 입력해 주세요.";
+        msgArea.style.color = "#e74c3c";
+        return;
+    }
+
+    if (pw !== pwConfirm) {
+        msgArea.innerText = "❌ 비밀번호와 비밀번호 확인이 일치하지 않습니다.";
+        msgArea.style.color = "#e74c3c";
+        return;
+    }
+
+    // ✅ 3. 모든 조건 통과 시 (수정된 부분)
+    msgArea.innerText = "✅ 로그인 정보가 확인되었습니다.";
+    msgArea.style.color = "#27ae60";
+
+    // 입력창 고정 (수정 불가)
+    emailInput.readOnly = true;
+    pwInput.readOnly = true;
+    pwConfirmInput.readOnly = true;
+    
+    // 배경색을 살짝 회색으로 바꿔 고정된 느낌 주기 (선택사항)
+    emailInput.style.backgroundColor = "#f0f0f0";
+    pwInput.style.backgroundColor = "#f0f0f0";
+    pwConfirmInput.style.backgroundColor = "#f0f0f0";
+
+    // 버튼 상태 변경 및 비활성화
+    btn.innerText = "확인 완료";
+    btn.disabled = true;
+    btn.style.backgroundColor = "#ccc"; // 비활성화 느낌의 색상
+    btn.style.cursor = "default";
+}
+
 // 체크인 날짜로부터 3일 전을 계산해주는 함수
 function getCancelDate(checkInDateStr) {
     if (!checkInDateStr) return "체크인 3일 전";
     
     const checkIn = new Date(checkInDateStr);
-    // 체크인 날짜에서 3일을 뺌
-    checkIn.setDate(checkIn.getDate() - 3);
+    // 체크인 날짜에서 7일을 뺌
+    checkIn.setDate(checkIn.getDate() - 7);
     
     const year = checkIn.getFullYear();
     const month = checkIn.getMonth() + 1;
@@ -855,6 +986,50 @@ function addGuest() {
     guestList.appendChild(newGuest);
 }
 
+window.requestHotelBooking = function() {
+    // 1. 로그인 정보 확인 완료 여부 체크
+    const loginBtn = document.querySelector('.validateLoginBtn') || document.querySelector('.filter-btn');
+    
+    // 버튼이 없거나, 비활성화(disabled)되지 않았으면서 텍스트도 '확인 완료'가 아니면 통과 못함
+    if (loginBtn && !loginBtn.disabled && loginBtn.innerText !== "확인 완료") {
+        alert("⚠️ [로그인 정보] 확인하기 버튼을 먼저 눌러주세요.");
+        loginBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+
+    // 2. 약관 필수 동의 여부 체크
+    const agrees = document.querySelectorAll('.agree-chk');
+    const isAllAgreed = Array.from(agrees).every(chk => chk.checked);
+
+    if (!isAllAgreed) {
+        alert("⚠️ 모든 필수 약관에 동의하셔야 예약이 가능합니다.");
+        const allCheck = document.getElementById('all-check');
+        if(allCheck) allCheck.focus();
+        return;
+    }
+
+    // 3. 대표 예약자 정보 빈칸 체크
+    // input-field 클래스를 가진 요소 중 비어있는 게 있는지 검사
+    const masterInputs = document.querySelectorAll('.section-card .input-field'); 
+    for (let input of masterInputs) {
+        // select 박스가 아니고 값이 비어있다면 경고
+        if (input.tagName !== 'SELECT' && input.value.trim() === "") {
+            alert(`⚠️ 모든 예약자 정보를 정확히 입력해주세요.`);
+            input.focus();
+            return;
+        }
+    }
+
+    // 4. 모든 관문 통과!
+    alert("✅ 확인되었습니다. 예약 페이지로 이동합니다.");
+    
+    // 최종 예약 함수 실행
+    if (typeof submitFinal === 'function') {
+        submitFinal(); 
+    } else {
+        console.log("실제 예약 로직(서버 전송 등)을 여기에 작성하세요.");
+    }
+};
 // 페이지 로드 시 초기 실행
 window.onload = () => {
     updateHeader();
