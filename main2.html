@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>MAIN</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="data.js"></script>
+
+<style>
+  /* [기본 설정] */
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Pretendard',sans-serif}
+  body{background:#F8F9FB; color:#333; padding-bottom: 120px;}
+  
+  /* [헤더] */
+  .header{height:64px; display:flex; justify-content:space-between; align-items:center; padding:0 24px; background:#fff; border-bottom:1px solid #E0E4EA; position:sticky; top:0; z-index:100;}
+  .header h1{font-size:20px; font-weight:700; color:#bd2aa4; cursor:pointer;}
+  
+  /* [사이드 메뉴] */
+  .menu{position:fixed; top:0; right:0; width:280px; height:100%; background:#fff; padding:30px; transform:translateX(100%); transition:.3s; z-index:1000; box-shadow:-10px 0 20px rgba(0,0,0,0.05)}
+  .menu.open{transform:translateX(0)}
+  .menu a{display:block; margin:25px 0; font-size:16px; font-weight:600; color:#444; text-decoration:none; cursor:pointer;}
+  .menu-trigger { font-size: 28px; font-weight: bold; color: #333; cursor: pointer; }
+
+  /* [히어로 배너] */
+  .hero { 
+    height: 300px; 
+    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('./asset/hero_banner.jpg'); 
+    background-size: cover; background-position: center; 
+    display: flex; align-items: center; justify-content: center; color: #fff; text-align: center; 
+  }
+  .hero h2 { font-size: 36px; letter-spacing: -1px; }
+
+  /* [메인 컨텐츠 레이아웃] */
+  #content-area { max-width: 1100px; margin: 0 auto; padding: 40px 20px; min-height: 50vh; }
+  
+  /* [호텔 그리드 & 필터] */
+  .filters { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 25px; }
+  .filter-btn { padding: 8px 16px; border: 1px solid #ddd; background: #fff; border-radius: 20px; cursor: pointer; font-size: 13px; transition: 0.2s; }
+  .filter-btn:hover, .filter-btn.active { background: #bd2aa4; color: #fff; border-color: #bd2aa4; }
+  
+  .hotel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+  .hotel-card { background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 10px 20px rgba(0,0,0,0.05); transition:.3s; border: 1px solid #eee; }
+  .hotel-card:hover { transform:translateY(-8px); }
+  .hotel-img { height:200px; background-size:cover; background-position:center; }
+  .hotel-info { padding:24px; text-align: left; }
+  .price-tag { font-size:20px; font-weight:800; color:#bd2aa4; }
+  .btn-reserve { width:100%; padding:14px; background:#111; color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:700; margin-top:20px; }
+
+  /* [상세 페이지 전용 카드] */
+  .section-card { background: #fff; padding: 30px; border-radius: 20px; border: 1px solid #eee; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); text-align: left; }
+  .booking-layout { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 30px; }
+  .cal-box { flex: 0 0 350px; gap: 15px;}
+  .room-box { flex: 1; }
+  .room-card { display: flex; gap: 15px; padding: 15px; border: 2px solid #f0f0f0; border-radius: 16px; cursor: pointer; margin-bottom: 12px; transition: 0.3s; background: #fff; align-items: center; }
+  .room-card.active { border-color: #bd2aa4; background: #fdf5fc; }
+  .room-img-sm { width: 120px; height: 90px; border-radius: 12px; object-fit: cover; }
+  
+  /* [객실 옵션 패널] */
+  .option-panel { max-height: 0; overflow: hidden; opacity: 0; transition: 0.4s ease; background: #fff; border: 1px solid #eee; border-radius: 15px; margin-top: -8px; margin-bottom: 20px; }
+  .option-panel.show { max-height: 1200px; opacity: 1; padding: 25px; }
+  .counter-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .cnt-btns { display: flex; align-items: center; gap: 12px; }
+  .cnt-btns button { width: 30px; height: 30px; border-radius: 50%; border: 1px solid #ddd; background: #fff; cursor: pointer; }
+
+  /* [하단 결제바] */
+  .payment-fix { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; padding: 20px 40px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; z-index: 1000; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); }
+  
+  /* [서브 카드: 로그인/CS/FAQ] */
+  .sub-card { max-width: 500px; margin: 0 auto; padding: 40px; background: #fff; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.06); text-align: center; }
+  .input-field { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; outline: none; }
+  .faq-search { width: 100%; padding: 14px 16px; border: 1px solid #ddd; border-radius: 12px; outline: none; margin-bottom: 20px; }
+  .map-frame { width: 100%; height: 350px; border-radius: 15px; border: 1px solid #eee; }
+
+  /* [세부 설정내 중첩된 아코디언] */
+  .inner-acc { border: 1px solid #edf1f7; border-radius: 12px; margin-bottom: 20px; overflow: hidden; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+  .inner-acc-head { padding: 16px 20px; background: #fcfcfd; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+  .inner-acc-head:hover { background: #f4f7fa; }
+  .inner-acc-head span:first-child { font-size: 15px; font-weight: 700; color: #444; display: flex; align-items: center; gap: 8px; }
+  .inner-acc-head span:last-child { font-size: 10px; color: #bd2aa4; background: #fdf5fc; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: 0.3s; }
+  .inner-acc-body { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.3s ease; background: #fff; line-height: 1.8; color: #666; font-size: 14px; padding: 0 20px; }
+  .inner-acc-body.open { max-height: 500px; opacity: 1; padding: 20px; border-top: 1px solid #f1f1f1; }
+
+  /* 관리자 페이지 전용 스타일 */
+  .admin-container { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+  .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #bd2aa4; padding-bottom: 20px; }
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+  .stat-card { background: #f8f9fb; padding: 20px; border-radius: 8px; border: 1px solid #eee; text-align: center; }
+  .stat-card h2 { color: #bd2aa4; font-size: 24px; }
+
+  .admin-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+  .admin-table th { background: #f8f9fb; padding: 15px; text-align: left; border-bottom: 2px solid #eee; color: #666; }
+  .admin-table td { padding: 15px; border-bottom: 1px solid #eee; }
+  .btn-excel { background: #27ae60; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+  .btn-delete { color: #ff4d4d; border: 1px solid #ff4d4d; background: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+
+  /* 푸터 스타일 */
+  .footer {width: 100vw; position: relative; left: 50%; right: 50%; margin-left: -50vw; margin-right: -50vw; background: #fff; padding: 60px 0; border-top: 1px solid #E0E4EA; margin-top: 80px;}
+  .footer-inner {max-width: 1200px; margin: 0 auto; padding : 0 24px;}
+  .footer-info {font-size: 13px; color: #666; line-height: 2;}
+  .footer-logo img {height: 35px; width: auto; filter : grayscale(20%); margin-bottom: 25px;}
+
+</style>
+</head>
+
+<body>
+<div class="header">
+    <div onclick="location.reload()" style="cursor:pointer; display:flex; align-items:center; padding: 10px 0;">
+        <img src="./asset/logo.jpg" alt="Logo" style="height:40px; width:auto; object-fit:contain;">
+    </div>
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <div id="auth-area"></div>
+        <div class="menu-trigger" onclick="toggleMenu()">☰</div>
+    </div>
+</div>
+
+<nav class="menu" id="sideMenu">
+  <div onclick="toggleMenu()" style="text-align:right; cursor:pointer; font-size:24px; margin-bottom:20px;">✕</div>
+  <a onclick="showSection('booking')">🏨 숙박예약</a>
+  <a onclick="showSection('login')">🔍 예약조회</a>
+  <a onclick="showSection('cs')">📞 고객센터</a>
+  <a onclick="showSection('faq')">❓ 자주 묻는 질문</a>
+</nav>
+
+<div class="hero">
+  <div><h2 id="heroTitle">Title</h2><p id="heroSub">Hero Sub</p></div>
+</div>
+
+<div id="content-area"></div>
+
+<div id="payment-bar" class="payment-fix" style="display:none;">
+    <div><span style="color:#888; font-size:14px;">최종 결제 금액</span><br><span id="totalAmount" style="font-size: 28px; font-weight: 800; color: #bd2aa4;">0</span>원</div>
+    <button class="btn-reserve" style="width:220px; margin:0; background:#bd2aa4;" onclick="renderPaymentView()">예약 신청하기</button>
+</div>
+
+<script>
+
+    
+// [상태 관리 및 초기화]
+let state = { nights: 0, roomPrice: 0, guests: 1, bf: 0, roomCount: 1, currentHotelId: null, roomType: "" }; 
+
+function getFooter() {
+    return `
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-logo">
+                <img src = "asset/logo.jpg" alt="로고">    
+            </div>
+            <div class="footer-info">
+                · 하이원 그랜드호텔 : 강원특별자치도 정선군 사북읍 하이원길 265<br>· 하이원 팰리스호텔 : 강원특별자치도 정선군 고한읍 고한7길 399<br>· 대표번호 : 1588-7789<br>· 메일주소 : webmaster@high1.com<br>· 사업자등록번호 : 255-81-10770<br>· 신고현황 : 통신판매업 신고 (제2021-강원정선-0079호, 제2006-00011호)<br>· 통신판매업 신고기관명 : 강원특별자치도 정선군청<br>· 대표이사 : 이삼걸
+            </div>
+            <p class="footer-copy">COPYRIGHT(C) 2019 BY KANGWONLAND,INC. ALL RIGHTS RESERVED.</p>
+        </div>
+    </footer>`;
+}
+
+function toggleMenu() { 
+    document.getElementById("sideMenu").classList.toggle("open"); 
+}
+
+// [1. 숙박 예약 리스트 렌더링]
+function renderBookingContent(data = HOTEL_DATA) {
+    let html = `
+        <div style="margin-bottom:40px; border-left:4px solid #bd2aa4; padding-left:20px;">
+            <h3 style="font-size:24px; font-weight:800; margin-bottom:10px;">숙박 예약</h3>
+            <p style="color:#555;">🔈️[알 림] 숙박확인서, 인보이스, 카드결제 영수증은 상단 메인 메뉴(≡) 중 예약조회에서 직접 발급하실 수 있습니다. </p>
+        </div>
+        <div class="filters">
+            <button class="filter-btn" onclick="sortHotels('low')">가격 낮은순</button>
+            <button class="filter-btn" onclick="sortHotels('high')">가격 높은순</button>
+        </div>
+        <div class="hotel-grid">`;
+
+    data.forEach(h => {
+        html += `
+            <div class="hotel-card">
+                <div class="hotel-img" style="background-image:url('${h.img}')"></div>
+                <div class="hotel-info">
+                    <h3 style = "font-size: 18px; font-weight: 700 !important; margin: 0; white-space: nowrap; min-width: 0;">${h.name}</h3>
+                    <p style="color:#f1c40f; margin-bottom:15px;">${h.star}</p>
+                    <h4>${h.distance}</h4>
+                    <hr style="border:0; border-top:1px solid #eee; margin:12px 0;">
+                    <div style="text-align: right;">
+                        <span class="price-tag">₩ ${h.price.toLocaleString()}~</span>
+                    </div>
+                    <button class="btn-reserve" onclick="renderDetailView(${h.id})">예약하기</button>
+                </div>
+            </div>`;
+            
+    });
+    
+    html += `</div>`;
+    html += getFooter();
+    document.getElementById("content-area").innerHTML = html;
+}
+
+function sortHotels(type) {
+    const sorted = [...HOTEL_DATA].sort((a, b) => type === 'low' ? a.price - b.price : b.price - a.price);
+    renderBookingContent(sorted);
+}
+
+// [2. 호텔 상세 페이지 렌더링]
+function renderDetailView(id) {
+    const hotel = HOTEL_DATA.find(h => h.id == id);
+    state.currentHotelId = id;
+    window.scrollTo(0,0);
+    document.getElementById('heroTitle').innerText = 'Title';
+    document.getElementById('heroSub').innerText = 'Sub Title';
+    document.getElementById('payment-bar').style.display = 'flex';
+
+    let html = `
+        <div class="section-card">
+            <h2 style="font-size: 28px;">${hotel.name}</h2>
+            <h3"><br>${hotel.engname}</h3>
+            <div style="color: #ffb800; margin: 10px 0;">${hotel.star}</div>
+            <p style="color: #666; font-size: 15px; margin-bottom: 20px;">${hotel.desc}</p>
+            <img src="${hotel.img}" style="width:100%; height:400px; object-fit:cover; border-radius:15px;">
+        </div>
+        <div class="booking-layout">
+            <div class="cal-box"><div class="section-card"><h3>📅 일정 선택</h3><div id="inline-calendar"></div></div></div>
+            <div id="room-area" class="room-box section-card" style="opacity: 0.3; pointer-events: none;">
+                <h3>🛏️ 객실 및 옵션 선택</h3>
+                <div id="room-list" style="margin-top:20px;"></div>
+            </div>
+        </div>
+        <div class="section-card">
+            <h3>
+                <span style="color: #2ecc71; font-weight: bold;">체크인</span> 15:00 &nbsp;&nbsp; 
+                <span style="color: #2ecc71; font-weight: bold;">체크아웃</span> 11:00
+            </h3>
+            <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:30px; margin-top:20px;">
+                <iframe class="map-frame" src="https://maps.google.com/maps?q=${encodeURIComponent(hotel.location)}&t=&z=14&ie=UTF8&iwloc=&output=embed" frameborder="0"></iframe>
+                <ul style="list-style:none;">
+                    <li style="margin-bottom:15px;"><strong>주소:</strong> ${hotel.location}</li>
+                    <li style="margin-bottom:15px;"><strong>전화 번호:</strong> ${hotel.tel || '02-1234-5678'}</li>
+                    <li style="margin-bottom:15px;"><strong>팩스 번호:</strong>
+                    <li><strong>홈페이지:</strong> <a href="https://www.high1.com/www/index.do" style="color:#bd2aa4; text-decoration:none; font-weight:700;">바로가기</a></li>
+                </ul>
+            </div>
+        
+
+        </div>`;
+
+    html += getFooter();    
+    document.getElementById('content-area').innerHTML = html;
+
+// [2. 호텔 상세 페이지 렌더링 내 room-list 생성 부분]
+const list = document.getElementById('room-list');
+list.innerHTML = ''; // 기존 리스트 초기화
+
+// 숙박 기간 텍스트 생성 (선택된 날짜 기반)
+Object.entries(hotel.roomPrices).forEach(([type, price]) => {
+    const cleanId = type.replace(/\s/g, '');
+    
+    const specificLink = (hotel.roomLinks && hotel.roomLinks[type]) 
+                         ? hotel.roomLinks[type]
+                         :"https://www.high1.com";
+    // 1. 객실 타입별 인원 설정 (의도하신 부분)
+    let capacity = "";
+    if (type.includes("트리플")) {
+        capacity = "기준인원 3명 / 최대인원 3명";
+    } else if (type.includes("더블") || type.includes("트윈")) {
+        capacity = "기준인원 2명 / 최대인원 2명";
+    } else if (type.includes("패밀리") || type.includes("온돌")) {
+        capacity = "기준인원 4명 / 최대인원 4명";
+    } else if (type.includes("디럭스") || type.includes("그랜드")) {
+        capacity = "기준인원 5명 / 최대인원 7명";
+    } else {
+        capacity = "기준인원 2명 / 최대인원 2명"; // 기본값
+    }
+
+    const roomNotice = `${capacity}`; // 화면에 표시될 문구
+
+    // 2. 날짜 정보 (몇 박, 며칠~며칠)
+    const dateInfo = state.nights > 0 
+        ? `${state.nights}박 (${state.checkIn} ~ ${state.checkOut})` 
+        : "날짜를 선택해 주세요";
+
+    list.innerHTML += `
+        <div class="room-card" id="card-${cleanId}" onclick="selRoom('${type}', ${price})">
+            <img src="${hotel.roomImgs[type] || hotel.img}" class="room-img-sm">
+            <div style="flex:1">
+                <h4>${type}</h4>
+                <div style="color:#bd2aa4; font-weight:700; margin-top:4px;">₩${price.toLocaleString()}</div>
+            </div>
+            <div>❯</div>
+        </div>
+
+        <div class="option-panel" id="panel-${cleanId}">
+            <div style="padding: 10px 20px 5px 20px;">
+                <div style="font-size:13px; color:#555; margin-bottom:4px; font-weight:600;">👥 ${capacity}</div>
+                <div class="date-info-text" style="font-size:13px; color:#bd2aa4; font-weight:600;">
+                    📅 ${state.nights > 0 ? state.nights + '박 (' + state.checkIn + ' ~ ' + state.checkOut + ')' : '날짜를 선택해 주세요'}
+                </div>
+            </div>
+        
+          <div class="inner-acc">
+            <div class="inner-acc-head" onclick="toggleAcc(this)">
+              <span>객실 상세보기</span>
+              <span>▼</span>
+            </div>
+            <div class="inner-acc-body">
+              <div style="margin-bottom:10px; line-height:1.6;">${hotel.desc_detail}</div>
+              <hr style="margin:10px 0; border:0; border-top:1px solid #eee;">
+              <a href="${specificLink}" target="_blank" style="color:#bd2aa4; text-decoration:underline; font-size:13px;">
+                >> 객실 자세히 보기
+              </a>
+            </div>
+          </div>
+          <div class="counter-row"><span>객실 수량</span><div class="cnt-btns"><button onclick="cnt('g',-1)">-</button><strong class="g-cnt">1</strong><button onclick="cnt('g',1)">+</button></div></div>
+          <div class="counter-row"><span>추가 조식(1인/박당)</span><div class="cnt-btns"><button onclick="cnt('b',-1)">-</button><strong class="b-cnt">0</strong><button onclick="cnt('b',1)">+</button></div></div>
+        </div>`;
+});
+
+    flatpickr("#inline-calendar", { mode: "range", inline: true, onChange: (dates) => { 
+        if(dates.length===2) { 
+            state.nights = Math.ceil(Math.abs(dates[1]-dates[0])/86400000); 
+            // [추가] 시작일과 종료일을 state에 저장
+            state.checkIn = dates[0].toLocaleDateString();
+            state.checkOut = dates[1].toLocaleDateString();
+            document.getElementById('room-area').style.opacity="1"; 
+            document.getElementById('room-area').style.pointerEvents="auto";
+            updateRoomDateInfo();
+            updateUI(); 
+        } 
+    }});
+}
+
+function updateRoomDateInfo() {
+    // 모든 객실 카드의 날짜 정보가 들어가는 div를 찾아서 글자만 바꿉니다.
+    // (이 기능을 쓰려면 HTML 생성 시 해당 부분에 class="date-info-text"를 넣어줘야 합니다)
+    const dateElements = document.querySelectorAll('.date-info-text');
+    const newText = `📅 ${state.nights}박 (${state.checkIn} ~ ${state.checkOut})`;
+    
+    dateElements.forEach(el => {
+        el.innerText = newText;
+    });
+}
+
+function selRoom(type, price) {
+    const cleanId = type.replace(/\s/g, '');
+    const targetPanel = document.getElementById(`panel-${cleanId}`);
+    const targetCard = document.getElementById(`card-${cleanId}`);
+
+    // 현재 클릭한 패널이 이미 열려있는지 확인
+    const isOpen = targetPanel.classList.contains('show');
+
+    // 1. 모든 패널과 카드를 초기화 (일단 다 닫기)
+    document.querySelectorAll('.option-panel').forEach(p => p.classList.remove('show'));
+    document.querySelectorAll('.room-card').forEach(c => c.classList.remove('active'));
+
+    // 2. 이미 열려있던 게 아니라면 새로 열기
+    if (!isOpen) {
+        targetPanel.classList.add('show');
+        targetCard.classList.add('active');
+        state.roomPrice = price;
+        state.roomType = type;
+    } else {
+        // 이미 열려있던 걸 다시 눌렀다면 닫힌 상태 유지하고 가격 초기화
+        state.roomPrice = 0;
+        state.roomType = "";
+    }
+
+    updateUI();
+}
+
+function cnt(t, v) {
+    if(t==='g') state.guests = Math.min(10, Math.max(1, state.guests+v));
+    else state.bf = Math.max(0, state.bf+v);
+    document.querySelectorAll('.g-cnt').forEach(el => el.innerText = state.guests);
+    document.querySelectorAll('.b-cnt').forEach(el => el.innerText = state.bf);
+    updateUI();
+}
+
+function updateUI() {
+    // 수식: ((객실가격 * 투숙인원) + (조식가격 * 조식인원)) * 숙박일수
+    const total = (state.nights > 0 && state.roomPrice > 0) 
+                  ? ((state.roomPrice * state.guests) + (state.bf * 20000)) * state.nights 
+                  : 0;
+    
+    document.getElementById('totalAmount').innerText = total.toLocaleString();
+}
+
+// [3. 메인 섹션 전환 기능]
+function showSection(key) {
+    const area = document.getElementById("content-area");
+    document.getElementById('payment-bar').style.display = 'none';
+    document.getElementById('heroTitle').innerText = SECTION_TITLE[key].title;
+    document.getElementById('heroSub').innerText = SECTION_TITLE[key].sub;
+
+    if (key === 'booking') {
+        renderBookingContent();
+    } else if (key === 'login') {
+        area.innerHTML = `
+            <div class="sub-card">
+                <h2 style="margin-bottom:20px; font-weight:800;">로그인</h2>
+                <p style="margin-bottom:25px; color:#666; font-size:14px;">이메일과 비밀번호를 입력해주세요.</p>
+                <input type="text" id="loginId" class="input-field" placeholder="이메일">
+                <input type="password" id="loginPw" class="input-field" placeholder="비밀번호">
+                <button class="btn-reserve" style="background:#bd2aa4; margin-top:20px;" onclick="checkLogin()">조회하기</button>
+                <div style="margin-top:20px; font-size:13px; color:#888;">
+                    <a href="#" style="color:#888; text-decoration:none; margin:0 10px;">비밀번호 찾기</a>
+                </div>
+            </div>`;
+    } else if (key === 'cs') {
+        area.innerHTML = `
+            <div class="sub-card" style="max-width:800px; padding:0; overflow:hidden;">
+                <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=800&q=80" style="width:100%;">
+            </div>`;
+    } else if (key === 'faq') {
+        renderFaqContent();
+    }
+    
+    const sideMenu = document.getElementById("sideMenu");
+    if(sideMenu.classList.contains("open")) sideMenu.classList.remove("open");
+    window.scrollTo(0,0);
+}
+
+// [4. 예약 조회 및 로그인 처리]
+async function checkLogin() {
+    const email = document.getElementById('loginId').value;
+    const pw = document.getElementById('loginPw').value;
+
+    // 1. 관리자 계정 하드코딩 체크 (DB 연동 전 테스트용)
+    if (email === "admin" && pw === "1234") {
+        alert("관리자 모드로 접속합니다.");
+        document.getElementById('heroTitle').innerText = "관리자 시스템";
+        document.getElementById('heroSub').innerText = "예약 내역 및 현황";
+        
+        // 2. 바로 관리자 화면을 그려버림 (showSection 거치지 않음)
+        renderAdminContent(); 
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/check-reservation', { 
+            method:'POST', 
+            headers:{'Content-Type':'application/json'}, 
+            body:JSON.stringify({email, password:pw}) 
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            const row = result.data;
+            sessionStorage.setItem('loggedInUser', JSON.stringify({ name: row.guestName, role: 'user' }));
+            updateHeader();
+
+            const area = document.getElementById('content-area');
+            document.getElementById('heroTitle').innerText = "예약 내역";
+            document.getElementById('heroSub').innerText = "고객님의 예약 정보를 확인하세요.";
+
+            area.innerHTML = `
+                <div class="section-card" style="max-width:700px; margin:0 auto;">
+                    <h2 style="margin-bottom:20px;">${row.guestName}님의 예약</h2>
+                    <div style="border:1px solid #eee; border-radius:10px; padding:20px; background:#fff;">
+                        <p style="margin-bottom:8px;"><strong>예약번호:</strong> ${row.id}</p>
+                        <p style="margin-bottom:8px;"><strong>호텔명:</strong> ${row.hotelName}</p>
+                        <p style="margin-bottom:8px;"><strong>체크인 날짜:</strong> ${row.checkIn}</p>
+                        <p style="margin-bottom:8px;"><strong>결제 금액:</strong> ₩ ${Number(row.totalPrice || 0).toLocaleString()}</p>
+                        <p style="margin-bottom:8px;"><strong>이메일:</strong> ${row.guestEmail}</p>
+                    </div>
+                    <div style="margin-top:20px; display:flex; gap:10px;">
+                        <button class="filter-btn" onclick="showSection('booking')">다른 객실 예약하기</button>
+                    </div>
+                </div>
+                ${getFooter()}
+            `;
+        } else {
+            alert(result.message);
+        }
+    } catch (error) {
+        console.error("로그인 에러:", error);
+        alert("서버 연결에 실패했습니다.");
+    }
+}
+
+function updateHeader() {
+    const userJson = sessionStorage.getItem('loggedInUser');
+    const authArea = document.getElementById('auth-area');
+    if (userJson && authArea) {
+        const user = JSON.parse(userJson);
+        authArea.innerHTML = `
+            <span style="font-size:14px;"><b>${user.name}</b>님</span>
+            <button onclick="handleLogout()" style="padding:4px 8px; font-size:11px; margin-left:10px; cursor:pointer;">로그아웃</button>`;
+    }
+}
+
+function handleLogout() {
+    sessionStorage.removeItem('loggedInUser');
+    alert("로그아웃 되었습니다.");
+    location.reload();
+}
+
+// [5. FAQ 검색 기능]
+function renderFaqContent(query = '') {
+    const q = query.toLowerCase();
+    const filtered = FAQ_DATA.filter(item => 
+        item.q.toLowerCase().includes(q) || item.a.toLowerCase().includes(q)
+    );
+    
+    let html = `
+        <div class="faq-search-wrap">
+            <input oninput="renderFaqContent(this.value)" class="faq-search" placeholder="궁금한 내용을 검색하세요" value="${query}">
+        </div>
+        <div style="max-width:800px; margin: 0 auto;">`;
+    
+    if (filtered.length === 0) {
+        html += `<div style="padding: 30px 0; color:#888; text-align:center;">검색 결과가 없습니다.</div>`;
+    } else {
+        filtered.forEach((item, index) => {
+            html += `
+                <div style="background:#fff; border-radius:12px; margin-bottom:10px; padding:20px; cursor:pointer; border:1px solid #eee;" 
+                     onclick="this.children[1].style.display=this.children[1].style.display==='none'?'block':'none'">
+                    <div style="font-weight:700;">Q. ${item.q}</div>
+                    <div style="display:none; margin-top:15px; color:#666; line-height:1.6; background:#f9f9f9; padding:15px; border-radius:10px;">
+                        A. ${item.a}
+                    </div>
+                </div>`;
+        });
+    }
+    html += getFooter();
+    document.getElementById("content-area").innerHTML = html + `</div>`;
+}
+
+function toggleAcc(el) {
+    // 클릭 이벤트가 부모 룸카드로 퍼져서 카드가 닫히는 것을 방지
+    if (window.event) window.event.stopPropagation();
+    
+    const body = el.nextElementSibling;
+    body.classList.toggle('open');
+    
+    const icon = el.querySelector('span:last-child');
+    icon.innerText = body.classList.contains('open') ? '▲' : '▼';
+}
+
+function toggleNested(el, isDeep = false) {
+  // 버블링 방지 : 클릭이 부모 'room-card'로 전달되어 선택이 해제 되는 것을 막음
+  if (window.event) window.event.stopPropagation();
+
+  const body= el.nextElementSibling;
+  body.classList.toggle('open');
+
+  const icon= el.querySelector('span:last-child');
+  if (isDeep) {
+    icon.innerText = body.classList.contains('open') ? '-' : '+';
+  } else {
+    icon.innerText = body.classList.contains('open') ? '▲' : '▼';
+  }
+}
+
+//관리자 페이지
+function renderAdminContent(){
+    // 2. 관리자 전용 레이아웃 생성 (admin.html의 스타일 이식)
+    let html = `
+        <div class="admin-container">
+            <div class="admin-header" style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <h2 style="color:#bd2aa4;">📋 전체 예약 통계</h2>
+                <button class="btn-excel" onclick="downloadExcel()">📊 엑셀 저장</button>
+            </div>
+            
+            <div class="stats-row" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-bottom:30px;">
+                <div class="stat-card" style="background:#fff; padding:20px; border-radius:12px; border:1px solid #eee; text-align:center;">
+                    <p style="font-size:13px; color:#888;">총 예약</p>
+                    <h3 id="total-count" style="color:#333;">0건</h3>
+                </div>
+                <div class="stat-card" style="background:#fff; padding:20px; border-radius:12px; border:1px solid #eee; text-align:center;">
+                    <p style="font-size:13px; color:#888;">누적 매출</p>
+                    <h3 id="total-revenue" style="color:#bd2aa4;">₩ 0</h3>
+                </div>
+                <div class="stat-card" style="background:#fff; padding:20px; border-radius:12px; border:1px solid #eee; text-align:center;">
+                    <p style="font-size:13px; color:#888;">서버 상태</p>
+                    <h3 style="color:#27ae60;">Active</h3>
+                </div>
+            </div>
+
+            <table class="admin-table" style="width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden;">
+                <thead style="background:#f8f9fb;">
+                    <tr>
+                        <th style="padding:15px; text-align:left;">예약번호</th>
+                        <th style="padding:15px; text-align:left;">예약자</th>
+                        <th style="padding:15px; text-align:left;">호텔정보</th>
+                        <th style="padding:15px; text-align:left;">금액</th>
+                        <th style="padding:15px; text-align:center;">관리</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-table-body"></tbody>
+            </table>
+        </div>
+    `;
+
+    // 실제 화면에 주입
+    html += getFooter();
+    document.getElementById("content-area").innerHTML = html;
+    
+    // 데이터 로드 함수 호출 (admin.html에 있던 그 로직)
+    loadAdminData();
+}
+
+async function loadAdminData() {
+    const tbody = document.getElementById('admin-table-body');
+    let totalRevenue = 0;
+
+    try {
+        const response = await fetch('/api/reservations');
+        const data = await response.json();
+
+        if (!Array.isArray(data) || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:50px; color:#999;">예약 데이터가 없습니다.</td></tr>';
+            document.getElementById('total-count').innerText = "0건";
+            document.getElementById('total-revenue').innerText = "₩ 0";
+            return;
+        }
+
+        tbody.innerHTML = data
+            .slice()
+            .reverse()
+            .map(item => {
+                const priceNum = parseInt(String(item.totalPrice).replace(/[^0-9]/g, '')) || 0;
+                totalRevenue += priceNum;
+                return `
+            <tr style="border-top:1px solid #eee;">
+                <td style="padding:15px; font-size:14px;">${item.id}</td>
+                <td style="padding:15px;"><strong>${item.guestName || ''}</strong><br><span style="font-size:12px; color:#888;">${item.guestEmail || ''}</span></td>
+                <td style="padding:15px; font-size:14px;">${item.hotelName || ''}<br><span style="font-size:12px; color:#888;">${item.checkIn || ''}</span></td>
+                <td style="padding:15px; font-weight:700; color:#bd2aa4;">${priceNum.toLocaleString()}</td>
+                <td style="padding:15px; text-align:center;">
+                    <button onclick="deleteRes('${item.id}')" style="color:#ff4d4d; border:1px solid #ff4d4d; background:none; padding:4px 8px; border-radius:4px; cursor:pointer;">삭제</button>
+                </td>
+            </tr>`;
+            }).join('');
+
+        document.getElementById('total-count').innerText = data.length + "건";
+        document.getElementById('total-revenue').innerText = "₩ " + totalRevenue.toLocaleString();
+    } catch (error) {
+        console.error("관리자 데이터 로드 에러:", error);
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:50px; color:#e74c3c;">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>';
+    }
+}
+
+async function deleteRes(id) {
+    if (!confirm('정말로 이 예약 내역을 삭제하시겠습니까?')) return;
+
+    try {
+        const response = await fetch(`/api/reserve/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            const result = await response.json().catch(() => ({}));
+            alert(result.error || "예약 삭제 중 오류가 발생했습니다.");
+            return;
+        }
+
+        loadAdminData();
+    } catch (error) {
+        console.error("삭제 요청 에러:", error);
+        alert("서버와 통신 중 문제가 발생했습니다.");
+    }
+}
+
+
+    // 엑셀(CSV) 다운로드 기능
+    function downloadExcel() {
+        const data = JSON.parse(localStorage.getItem('reservations') || '[]');
+        if(data.length === 0) { alert('다운로드할 데이터가 없습니다.'); return; }
+
+        let csv = "\uFEFF"; // 한글 깨짐 방지 BOM
+        csv += "예약번호,신청일시,이름(국문),이름(영문),소속,연락처,이메일,호텔명,객실타입,숙박기간,결제금액\n";
+
+        data.forEach(item => {
+            csv += `"${item.id}","${item.orderDate}","${item.guestName}","${item.guestNameEn}","${item.guestAff}","${item.guestPhone}","${item.guestEmail}","${item.hotelName}","${item.roomType}","${item.dateRange}","${item.totalPrice.replace(/,/g,'')}"\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `IMWA2026_예약명단_${new Date().toLocaleDateString()}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
+//섹션 내 국적 선택 페이지 
+const countryOptions = COUNTRY_DATA.map(c => `<option value="${c.code}">${c.name}</option>`).join('');
+
+//상세 결제 페이지 
+function renderPaymentView() {
+    const hotel = HOTEL_DATA.find(h => h.id == state.currentHotelId);
+    // 0. 방어 로직 (날짜/객실 미선택 시)
+    if (state.nights === 0 || state.roomPrice === 0) {
+        alert("일정 및 객실을 먼저 선택해 주세요.");
+        return;
+    }
+
+    // 1. 상단 배너 및 상태값 설정
+    document.getElementById('heroTitle').innerText = "Booking & Payment";
+    document.getElementById('heroSub').innerText = "안전한 결제를 위해 정보를 정확히 입력해주세요.";
+    document.getElementById('payment-bar').style.display = 'none';
+
+    // 2. 폼 렌더링 시작
+    let html = `
+    <div style="max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 30px;">
+        
+        <div class="section-card">
+            <h3 style="margin-bottom:20px;">🏨 주요 정보</h3>
+            <div style="gap:20px; margin-bottom:20px;">
+                
+                <img src="${hotel?.roomImgs?.[state.roomType] || hotel?.img || ''}" style="width:830px; height:450px; border-radius:10px; object-fit:cover;display: block;">
+                <div>
+                    <br><h4 style = "font-size: 28px; font-weight: 800; color: #333; margin-bottom: 20px; letter-spacing: -1px;">${HOTEL_DATA.find(h => h.id === state.currentHotelId)?.name}<br>${state.roomType}</h4>
+                    <p style="font-size: 16px; color: #333; font-weight: 600;"><br>${state.nights}박<br><br>체크인: ${state.checkIn || '-'}<br><br>체크아웃: ${state.checkOut || '-'}</p>
+                    <p style="font-size: 16px; color: #333; font-weight: 600;"><br>조식 추가: ${state.bf}개</p>
+                </div>
+            </div>
+            <div style="margin: 20px 0; border: 1px solid #eee; border-radius: 10px; background: #fff; overflow: hidden;">
+                <div style="padding: 15px 20px; background: #fafafa; border-bottom: 1px solid #eee; font-weight: bold; color: #333; display: flex; align-items: center; gap: 8px;">
+                    🔍 객실 세부 설명 및 이용 안내
+                </div>
+    
+                <div style="padding: 20px; font-size: 14px; color: #666; line-height: 1.8; max-height: 400px; overflow-y: auto;">
+                    ${HOTEL_DATA.find(h => h.id === state.currentHotelId)?.desc_detail || '객실 상세 정보가 준비 중입니다.'}
+                </div>
+            </div>
+            <div style="padding:15px; background:#fdf5fc; border:1px solid #bd2aa4; border-radius:10px; color:#bd2aa4; font-weight:600;">
+                ✅ 무료취소 가능 기간: ${state.checkIn ? getCancelDate(state.checkIn) : '체크인 3일 전'}까지
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h3 style="margin-bottom:20px;">🔑 로그인 정보</h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                <input type="email" id ="loginEmail" class="input-field" placeholder="이메일">
+                <input type="password" id = "loginPw" class="input-field" placeholder="비밀번호">
+                <input type="password" id = "loginPwConfirm" class="input-field" placeholder="비밀번호 확인">
+                <button type="button" class="filter-btn" style="height:50px; margin-top:10px;" onclick="validateLogin()">로그인정보 확인하기</button>
+            </div>
+            <div id="loginMsg" style="margin-top:10px; font-size:14px; font-weight:bold;"></div>
+        </div>
+
+        <div class="section-card">
+            <h3 style="margin-bottom:20px;">👤 대표 예약자</h3>
+            <div id="master-info" style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                <input type="text" class="input-field master-name" placeholder="성명">
+                <input type="text" class="input-field master-birth" placeholder="법정생년월일 (6자리)">
+                <input type="tel" class="input-field master-phone" placeholder="연락처">
+                <input type="email" class="input-field master-email" placeholder="이메일">
+                <select class="input-field master-nation">
+                    ${countryOptions}
+                </select>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3>🛏️ 객실 예약자</h3>
+                <label style="font-size:14px;"><input type="checkbox" onchange="copyGuestInfo(this)"> 대표예약자와 동일</label>
+            </div>
+            <div id="guest-list">
+                <div class="guest-item" style="border:1px solid #eee; padding:15px; border-radius:10px; margin-bottom:10px;">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        <input type="text" class="input-field g-name" placeholder="성명">
+                        <input type="text" class="input-field g-birth" placeholder="법정생년월일">
+                        <input type="tel" class="input-field g-phone" placeholder="연락처">
+                        <input type="email" class="input-field g-email" placeholder="이메일">
+                        <select class="input-field g-nation">
+                            ${countryOptions}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <button class="filter-btn" style="width:100%;" onclick="addGuest()">+ 여행자 추가</button>
+        </div>
+
+        <div class="section-card" style="background: #fff; border: 1px solid #e1e4e9; padding: 30px; border-radius: 8px; margin-bottom: 25px;">
+            <h3 style="margin-bottom:20px; border-left: 4px solid #bd2aa4; padding-left: 15px;">📄 약관 동의</h3>
+            <div style="text-align:left; background:#f8f9fb; padding:20px; border-radius:10px; border: 1px solid #eee;">
+                <label style="font-weight:bold; display:block; margin-bottom:10px; cursor:pointer;">
+                    <input type="checkbox" id="all-check" onclick="allAgree(this)"> 모두 동의
+                </label>
+                <hr style="margin-bottom:12px; border:0; border-top:1px solid #ddd;">
+        
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <label style="font-size:15px; cursor:pointer;"><input type="checkbox" class="agree-chk"> 개인정보 수집 및 이용 동의 (필수)</label>
+                    <span style="font-size:12px; color:#999; text-decoration:underline; cursor:pointer;" onclick="showTerms('privacy')">전문보기</span>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <label style="font-size:15px; cursor:pointer;"><input type="checkbox" class="agree-chk"> 고유식별정보 수집 이용 동의 (필수)</label>
+                    <span style="font-size:12px; color:#999; text-decoration:underline; cursor:pointer;" onclick="showTerms('identification')">전문보기</span>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <label style="font-size:15px; cursor:pointer;"><input type="checkbox" class="agree-chk"> 개인정보 위탁 동의 (필수)</label>
+                    <span style="font-size:12px; color:#999; text-decoration:underline; cursor:pointer;" onclick="showTerms('consignment')">전문보기</span>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <label style="font-size:15px; cursor:pointer;"><input type="checkbox" class="agree-chk"> 개인정보 제3자 제공 동의 (필수)</label>
+                    <span style="font-size:12px; color:#999; text-decoration:underline; cursor:pointer;" onclick="showTerms('thirdparty')">전문보기</span>
+                </div>
+            </div>
+        </div>
+
+<div id="termsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+    <div style="background:#fff; width:90%; max-width:500px; padding:30px; border-radius:10px; position:relative;">
+        <h4 id="termsTitle" style="margin-bottom:15px;">약관 전문</h4>
+        <div id="termsContent" style="height:300px; overflow-y:auto; border:1px solid #eee; padding:15px; font-size:13px; color:#666; line-height:1.6; white-space:pre-wrap;"></div>
+        <button onclick="closeTerms()" style="width:100%; margin-top:20px; height:45px; background:#333; color:#fff; border:none; border-radius:5px; cursor:pointer;">닫기</button>
+    </div>
+</div>
+
+        <div class="section-card" style="background:#fff; border:1px solid #ddd; padding:30px; border-radius:10px;">
+            <h3 style="margin-bottom:20px; border-left: 4px solid #bd2aa4; padding-left: 15px;">💳 결제 정보</h3>
+            
+            <div style="background: #fdf5fc; border: 1px solid #fae1f5; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <label style="display: flex; align-items: flex-start; gap: 10px; font-weight: bold; font-size: 14.5px; color: #333; cursor: pointer; margin-bottom: 12px;">
+                    <input type="checkbox" style="margin-top: 4px;"> 
+                    <span>예약 후 결제 카드 변경 또는 체크아웃 날짜 이전까지 온라인 재결제를 원하시면 선택하세요.</span>
+                </label>
+                <ul style="margin: 0; padding-left: 18px; list-style-type: none; font-size: 13px; color: #666; line-height: 1.7;">
+                    <li style="margin-bottom: 5px;">• 먼저, 아래 버튼을 클릭하여 <strong>전액 선결제</strong>를 완료해 주세요.</li>
+                    <li style="margin-bottom: 5px;">• 체크아웃 날짜 이전까지 <strong>카드 변경 및 재결제</strong>가 가능합니다. (호텔 프런트 불가)</li>
+                    <li style="margin-bottom: 0;">• 온라인 재결제가 완료되면 <strong>기존 선결제 금액은 자동으로 취소</strong>됩니다.</li>
+                </ul>
+            </div>
+
+            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #eee;">
+                <p style="font-weight: bold; margin-bottom: 12px; font-size: 15px;">💰 결제 금액 선택</p>
+                <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                    <label style="font-size: 14px; cursor:pointer;"><input type="radio" name="payType" checked onclick="document.getElementById('customPayInput').style.display='none'"> 전액 결제</label>
+                    <label style="font-size: 14px; cursor:pointer;"><input type="radio" name="payType" onclick="document.getElementById('customPayInput').style.display='flex'"> 금액 직접 입력</label>
+                    <div id="customPayInput" style="display: none; align-items: center; gap: 5px; flex: 1;">
+                        <input type="text" class="input-field" placeholder="금액 입력" style="flex:1; height:40px;">
+                        <span style="font-size:14px; color:#666;">원</span>
+                    </div>
+                </div>
+                <p style="font-size: 12.5px; color: #bd2aa4; margin-top: 10px; font-weight: 500;">* 총 결제 예정 금액: ₩ ${document.getElementById('totalAmount').innerText}</p>
+            </div>
+            
+            <div class="button-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                <button class="filter-btn active" onclick="selectPayMode('domestic-manual', this)">국내카드(수기)</button>
+                <button class="filter-btn" onclick="selectPayMode('domestic-manual-none', this)">국내카드</button>
+                <button class="filter-btn" onclick="selectPayMode('global-manual', this)">해외카드(수기)</button>
+                <button class="filter-btn" onclick="selectPayMode('global-manual-none', this)">해외카드</button>
+            </div>
+            
+            <div id="manual-card-area" style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom: 25px;">
+    
+                <div style="grid-column: span 2;">
+                    <label style="display:block; font-size: 14px; margin-bottom: 5px; font-weight: bold; color: #333;">카드번호</label>
+                    <input type="text" class="input-field" style="width:100%; box-sizing: border-box;" placeholder="숫자 16자리를 입력하세요">
+                </div>
+
+                <div>
+                    <label style="display:block; font-size: 14px; margin-bottom: 5px; font-weight: bold; color: #333;">인증정보</label>
+                    <input type="text" class="input-field" style="width:100%; box-sizing: border-box;" placeholder="생년월일(6자리) 또는 사업자번호">
+                </div>
+
+                <div>
+                    <label style="display:block; font-size: 14px; margin-bottom: 5px; font-weight: bold; color: #333;">유효기간 (월/년)</label>
+                    <div style="display:flex; gap:5px;">
+                        <input type="text" class="input-field" placeholder="MM" style="width:50%; box-sizing: border-box;">
+                        <input type="text" class="input-field" placeholder="YY" style="width:50%; box-sizing: border-box;">
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display:block; font-size: 14px; margin-bottom: 5px; font-weight: bold; color: #333;">비밀번호</label>
+                    <input type="password" class="input-field" style="width:100%; box-sizing: border-box;" placeholder="앞 2자리 입력">
+                </div>
+
+                <div>
+                    <label style="display:block; font-size: 14px; margin-bottom: 5px; font-weight: bold; color: #333;">할부 설정</label>
+                    <select class="input-field" style="width:100%; box-sizing: border-box; height: 48px;">
+                        <option>일시불</option>
+                        <option>2개월</option>
+                        <option>3개월</option>
+                    </select>
+                </div>
+
+            </div>
+            
+            <div id="manual-card-area-global" style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom: 25px;">
+    
+                <div style="grid-column: span 2;">
+                    <label style="display:block; font-size: 14px; margin-bottom: 5px; font-weight: bold; color: #333;">카드번호(숫자만)</label>
+                    <input type="text" class="input-field" style="width:100%; box-sizing: border-box;" placeholder="Card Number">
+                </div>
+
+                <div>
+                    <label style="display:block; font-size: 14px; margin-bottom: 5px; font-weight: bold; color: #333;">유효기간 (월/년)</label>
+                    <div style="display:flex; gap:5px;">
+                        <input type="text" class="input-field" placeholder="MM" style="width:50%; box-sizing: border-box;">
+                        <input type="text" class="input-field" placeholder="YY" style="width:50%; box-sizing: border-box;">
+                    </div>
+                </div>
+
+            </div>
+
+            <div style="text-align: center; border-top: 1px solid #eee; padding-top: 25px;">
+                <div style="margin-bottom: 20px;">
+                    <span style="color: #888; font-size: 14px;">최종 결제 금액</span>
+                    <h2 style="color: #bd2aa4; font-size: 32px; margin-top: 5px;">₩ ${document.getElementById('totalAmount').innerText}</h2>
+                </div>
+                <button class="btn-reserve" style="background:#bd2aa4; color:white; width:100%; height:60px; font-size:20px; border-radius:8px; border:none; font-weight:bold; cursor:pointer;" onclick="requestHotelBooking()">
+                    예약하기
+                </button>
+            </div>
+        </div>
+
+        </div>
+    </div>`;
+
+    html += getFooter();
+    document.getElementById("content-area").innerHTML = html;
+    window.scrollTo(0,0);
+}
+
+// 1. 모두 동의 기능
+window.allAgree = function(target) {
+    const checkboxes = document.querySelectorAll('.agree-chk');
+    checkboxes.forEach((checkbox) => {
+        checkbox.checked = target.checked;
+    });
+};
+
+// 2. 개별 체크박스 클릭 시 '모두 동의' 체크박스 상태 업데이트
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('agree-chk')) {
+        const allBtn = document.getElementById('all-check');
+        const total = document.querySelectorAll('.agree-chk').length;
+        const checked = document.querySelectorAll('.agree-chk:checked').length;
+        allBtn.checked = (total === checked);
+    }
+});
+
+// 3. 전문보기 팝업 열기
+window.showTerms = function(content) {
+    document.getElementById('termsContent').innerText = content;
+    document.getElementById('termsModal').style.display = 'flex';
+};
+
+// 4. 전문보기 팝업 닫기
+window.closeTerms = function() {
+    document.getElementById('termsModal').style.display = 'none';
+};
+
+// 전문보기 함수
+window.showTerms = function(type) {
+    // data.js에 저장된 TERMS_DATA를 참조합니다.
+    const content = window.TERMS_DATA[type]; 
+    
+    const titles = {
+        privacy: "개인정보 수집 및 이용 동의",
+        identification: "고유식별정보 수집 이용 동의",
+        consignment: "개인정보 위탁 동의",
+        thirdparty: "개인정보 제3자 제공 동의"
+    };
+
+    if (content) {
+        document.getElementById('termsTitle').innerText = titles[type];
+        document.getElementById('termsContent').innerText = content;
+        document.getElementById('termsModal').style.display = 'flex';
+    } else {
+        alert("내용을 불러올 수 없습니다.");
+    }
+};
+
+window.validateLogin = function() {
+    const emailInput = document.getElementById('loginEmail');
+    const pwInput = document.getElementById('loginPw');
+    const pwConfirmInput = document.getElementById('loginPwConfirm');
+    const btn = document.querySelector('.filter-btn'); // 버튼 선택
+    const msgArea = document.getElementById('loginMsg');
+
+    const email = emailInput.value;
+    const pw = pwInput.value;
+    const pwConfirm = pwConfirmInput.value;
+
+    // 1. 이메일 형식 체크
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+        msgArea.innerText = "❌ 올바른 이메일 형식이 아닙니다. 다시 확인해 주세요.";
+        msgArea.style.color = "#e74c3c";
+        return;
+    }
+
+    // 2. 비밀번호 일치 체크
+    if (pw === "" || pwConfirm === "") {
+        msgArea.innerText = "❌ 비밀번호를 입력해 주세요.";
+        msgArea.style.color = "#e74c3c";
+        return;
+    }
+
+    if (pw !== pwConfirm) {
+        msgArea.innerText = "❌ 비밀번호와 비밀번호 확인이 일치하지 않습니다.";
+        msgArea.style.color = "#e74c3c";
+        return;
+    }
+
+    // ✅ 3. 모든 조건 통과 시 (수정된 부분)
+    msgArea.innerText = "✅ 로그인 정보가 확인되었습니다.";
+    msgArea.style.color = "#27ae60";
+
+    // 입력창 고정 (수정 불가)
+    emailInput.readOnly = true;
+    pwInput.readOnly = true;
+    pwConfirmInput.readOnly = true;
+    
+    // 배경색을 살짝 회색으로 바꿔 고정된 느낌 주기 (선택사항)
+    emailInput.style.backgroundColor = "#f0f0f0";
+    pwInput.style.backgroundColor = "#f0f0f0";
+    pwConfirmInput.style.backgroundColor = "#f0f0f0";
+
+    // 버튼 상태 변경 및 비활성화
+    btn.innerText = "확인 완료";
+    btn.disabled = true;
+    btn.style.backgroundColor = "#ccc"; // 비활성화 느낌의 색상
+    btn.style.cursor = "default";
+}
+
+function selectPayMode(mode, targetBtn) {
+    // 1. 모든 버튼에서 'active' 클래스를 싹 다 제거 (동시 선택 방지)
+    const allButtons = document.querySelectorAll('.filter-btn');
+    allButtons.forEach(btn => btn.classList.remove('active'));
+
+    // 2. 내가 클릭한 버튼만 'active' 추가
+    targetBtn.classList.add('active');
+
+    // 3. 입력 영역 초기화 (일단 다 숨기기)
+    const domesticArea = document.getElementById('manual-card-area');
+    const globalArea = document.getElementById('manual-card-area-global');
+    
+    if (domesticArea) domesticArea.style.display = 'none';
+    if (globalArea) globalArea.style.display = 'none';
+
+    // 4. 선택한 모드에 맞춰 해당 영역만 보여주기
+    if (mode === 'domestic-manual') {
+        domesticArea.style.display = 'grid';
+    } else if (mode === 'global-manual') {
+        globalArea.style.display = 'grid';
+    } else if (mode === 'domestic-manual-none') {
+        domesticArea.style.display = 'none';
+    } else if (mode === 'global-manual-none') {
+        globalArea.style.display = 'none';
+    }
+    // 일반결제(domestic-general, global-general)는 영역을 모두 숨긴 상태로 유지
+}
+
+// 체크인 날짜로부터 3일 전을 계산해주는 함수
+function getCancelDate(checkInDateStr) {
+    if (!checkInDateStr) return "체크인 3일 전";
+    
+    const checkIn = new Date(checkInDateStr);
+    // 체크인 날짜에서 7일을 뺌
+    checkIn.setDate(checkIn.getDate() - 7);
+    
+    const year = checkIn.getFullYear();
+    const month = checkIn.getMonth() + 1;
+    const day = checkIn.getDate();
+    
+    return `${year}년 ${month}월 ${day}일`;
+}
+
+function copyGuestInfo(checkbox) {
+    const master = document.getElementById('master-info');
+    const guestList = document.getElementById('guest-list');
+    const firstGuest = guestList.querySelector('.guest-item');
+
+    if (!master || !firstGuest) return;
+
+    const masterName = master.querySelector('.master-name');
+    const masterBirth = master.querySelector('.master-birth');
+    const masterPhone = master.querySelector('.master-phone');
+    const masterEmail = master.querySelector('.master-email');
+    const masterNation = master.querySelector('.master-nation');
+
+    const guestName = firstGuest.querySelector('.g-name');
+    const guestBirth = firstGuest.querySelector('.g-birth');
+    const guestPhone = firstGuest.querySelector('.g-phone');
+    const guestEmail = firstGuest.querySelector('.g-email');
+    const guestNation = firstGuest.querySelector('.g-nation');
+
+    if (checkbox.checked) {
+        if (guestName && masterName) guestName.value = masterName.value;
+        if (guestBirth && masterBirth) guestBirth.value = masterBirth.value;
+        if (guestPhone && masterPhone) guestPhone.value = masterPhone.value;
+        if (guestEmail && masterEmail) guestEmail.value = masterEmail.value;
+        if (guestNation && masterNation) guestNation.value = masterNation.value;
+    } else {
+        if (guestName) guestName.value = "";
+        if (guestBirth) guestBirth.value = "";
+        if (guestPhone) guestPhone.value = "";
+        if (guestEmail) guestEmail.value = "";
+    }
+}
+
+//여행자 추가 버튼
+function addGuest() {
+    const guestList = document.getElementById('guest-list');
+    const currentCount = guestList.getElementsByClassName('guest-item').length + 1;
+
+    const newGuest = document.createElement('div');
+    newGuest.className = 'guest-item';
+    newGuest.style.cssText = "border:1px solid #eee; padding:20px; border-radius:12px; margin-bottom:15px; background:#fff; position:relative;";
+
+    newGuest.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <strong style="color:#bd2aa4;">추가 객실 예약자 ${currentCount}</strong>
+            <button onclick="this.parentElement.parentElement.remove()" style="color:#ff4d4d; background:none; border:none; cursor:pointer; font-size:12px;">✕ 삭제</button>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <input type="text" class="input-field g-name" placeholder="성명">
+            <input type="text" class="input-field g-birth" placeholder="법정생년월일">
+            <input type="tel" class="input-field g-phone" placeholder="연락처">
+            <input type="email" class="input-field g-email" placeholder="이메일">
+            <select class="input-field g-nation" style="grid-column: span 2;">
+                ${countryOptions}
+            </select>
+        </div>
+    `;
+
+    guestList.appendChild(newGuest);
+}
+
+window.requestHotelBooking = function() {
+    // 1. 로그인 정보 확인 완료 여부 체크
+    const loginBtn = document.querySelector('.validateLoginBtn') || document.querySelector('.filter-btn');
+    
+    // 버튼이 없거나, 비활성화(disabled)되지 않았으면서 텍스트도 '확인 완료'가 아니면 통과 못함
+    if (loginBtn && !loginBtn.disabled && loginBtn.innerText !== "확인 완료") {
+        alert("⚠️ [로그인 정보] 확인하기 버튼을 먼저 눌러주세요.");
+        loginBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+
+    // 2. 약관 필수 동의 여부 체크
+    const agrees = document.querySelectorAll('.agree-chk');
+    const isAllAgreed = Array.from(agrees).every(chk => chk.checked);
+
+    if (!isAllAgreed) {
+        alert("⚠️ 모든 필수 약관에 동의하셔야 예약이 가능합니다.");
+        const allCheck = document.getElementById('all-check');
+        if(allCheck) allCheck.focus();
+        return;
+    }
+
+    // 3. 대표 예약자 정보 빈칸 체크
+    // input-field 클래스를 가진 요소 중 비어있는 게 있는지 검사
+    const masterInputs = document.querySelectorAll('.section-card .input-field'); 
+    for (let input of masterInputs) {
+        // select 박스가 아니고 값이 비어있다면 경고
+        if (input.tagName !== 'SELECT' && input.value.trim() === "") {
+            alert(`⚠️ 모든 예약자 정보를 정확히 입력해주세요.`);
+            input.focus();
+            return;
+        }
+    }
+
+    submitFinal();
+};
+
+async function submitFinal() {
+    const loginEmailInput = document.getElementById('loginEmail');
+    const loginPwInput = document.getElementById('loginPw');
+
+    const master = document.getElementById('master-info');
+    const masterName = master.querySelector('.master-name');
+    const masterPhone = master.querySelector('.master-phone');
+    const masterEmail = master.querySelector('.master-email');
+
+    const totalText = document.getElementById('totalAmount').innerText || "0";
+    const numericTotal = parseInt(totalText.replace(/[^0-9]/g, ''), 10) || 0;
+
+    const hotel = HOTEL_DATA.find(h => h.id === state.currentHotelId);
+
+    const payload = {
+        hotelName: hotel ? hotel.name : '',
+        guestName: masterName ? masterName.value : '',
+        guestEmail: (loginEmailInput && loginEmailInput.value) || (masterEmail ? masterEmail.value : ''),
+        password: loginPwInput ? loginPwInput.value : '',
+        checkIn: state.checkIn || '',
+        totalPrice: numericTotal
+    };
+
+    try {
+        const response = await fetch('/api/reserve', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            alert(result.error || "예약 처리 중 오류가 발생했습니다.");
+            return;
+        }
+
+        alert(`✅ 예약이 완료되었습니다. 예약번호: ${result.id}`);
+        window.location.reload();
+    } catch (error) {
+        console.error("예약 요청 에러:", error);
+        alert("서버와 통신 중 문제가 발생했습니다.");
+    }
+}
+// 페이지 로드 시 초기 실행
+window.onload = () => {
+    updateHeader();
+    showSection('booking');
+};
+</script>
+</body>
+
+</html>
+
+
+
+
